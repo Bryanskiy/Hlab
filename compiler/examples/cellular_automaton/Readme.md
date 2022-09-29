@@ -4,4 +4,11 @@ A cellular automaton consists of a regular grid of cells, each in one of a finit
 
 ## Example: Conway's Game of Life
 
+![1eba410d6dad3c02530a85265845c8fe png](https://user-images.githubusercontent.com/65131002/192104124-b01209a1-d668-458b-a8bd-85c2241f49dd.gif)
+
 ## Example: Cyclic cellular automaton
+
+<p float="left">
+  <img src="https://user-images.githubusercontent.com/65131002/193006375-40f7ee87-2faf-492c-be9f-ea50d264de9a.gif" width="450" height="300"/>
+  <img src="https://user-images.githubusercontent.com/65131002/193008110-1a199690-ca98-4664-b870-db4ab725dcd7.gif" width="450" height="300"/>
+</p>
