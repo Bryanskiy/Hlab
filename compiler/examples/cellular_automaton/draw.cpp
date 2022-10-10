@@ -32,7 +32,7 @@ extern "C" {
         window.create(sf::VideoMode(width, height), "Game of Life");
     }
 
-    uint8_t dr_window_is_open() {
+    int dr_window_is_open() {
         return (uint8_t)window.isOpen();
     }
 
@@ -51,9 +51,5 @@ extern "C" {
 
     void dr_flush() {
         window.display();
-    }
-
-    void dr_clear() {
-        window.clear(sf::Color::Black);
     }
 }
