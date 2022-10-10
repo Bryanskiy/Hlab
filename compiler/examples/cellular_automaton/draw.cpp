@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <limits.h>
+#include <stdlib.h>
 #include "draw.h"
 
 sf::RenderWindow window;
@@ -28,19 +29,16 @@ static sf::Color match_color(STATE state) {
 }
 
 extern "C" {
+    int dr_rand() {
+        return rand();
+    }
+
     void dr_init_window(unsigned width, unsigned height) {
         window.create(sf::VideoMode(width, height), "Game of Life");
     }
 
     int dr_window_is_open() {
         return (uint8_t)window.isOpen();
-    }
-
-    void dr_process_events() {
-        while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed)
-                window.close();
-        }
     }
 
     void dr_put_pixel(int x, int y, STATE state) {
@@ -50,6 +48,10 @@ extern "C" {
     }
 
     void dr_flush() {
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed)
+                window.close();
+        }
         window.display();
     }
 }

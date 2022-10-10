@@ -1,9 +1,6 @@
 
 #pragma once
 
-#include <stdlib.h>
-#include <time.h>
-
 typedef int STATE;
 
 #ifdef __cplusplus
@@ -14,6 +11,7 @@ extern "C" {
     void dr_put_pixel(int x, int y, STATE state);
     void dr_process_events();
     void dr_flush();
-#ifdef __cplusplus    
+    int dr_rand();
+#ifdef __cplusplus
 }
 #endif 

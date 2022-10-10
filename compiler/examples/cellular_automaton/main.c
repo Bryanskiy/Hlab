@@ -11,10 +11,9 @@ int current_surf[WINDOW_WIDTH][WINDOW_HEIGHT];
 int tmp_surf[WINDOW_WIDTH][WINDOW_HEIGHT];
 
 void init_world() {
-    srand(time(NULL));
     for(int x = 0; x < WINDOW_WIDTH; ++x) {
         for(int y = 0; y < WINDOW_HEIGHT; ++y) {
-            current_surf[x][y] = rand() % COLORS_COUNT;
+            current_surf[x][y] = dr_rand() % COLORS_COUNT;
         }
     }
 }
@@ -83,7 +82,6 @@ int main(int argc, char * argv[]) {
     while(dr_window_is_open()) {
         draw();
         update();
-        dr_process_events();
         swap(&current_surf, &tmp_surf);
     }
 }
