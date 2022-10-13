@@ -37,10 +37,6 @@ extern "C" {
         window.create(sf::VideoMode(width, height), "Game of Life");
     }
 
-    int dr_window_is_open() {
-        return (uint8_t)window.isOpen();
-    }
-
     void dr_put_pixel(int x, int y, STATE state) {
         sf::Color color = match_color(state);
         sf::Vertex point({x, y}, color);

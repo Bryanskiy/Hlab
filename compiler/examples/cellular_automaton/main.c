@@ -79,7 +79,7 @@ int main(int argc, char * argv[]) {
     dr_init_window(WINDOW_WIDTH, WINDOW_HEIGHT);
 
     init_world();
-    while(dr_window_is_open()) {
+    while(1) {
         draw();
         update();
         swap(&current_surf, &tmp_surf);
