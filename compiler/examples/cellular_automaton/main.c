@@ -75,13 +75,13 @@ void draw() {
     dr_flush();
 }
 
-int main(int argc, char * argv[]) {
+int main() {
     dr_init_window(WINDOW_WIDTH, WINDOW_HEIGHT);
 
     init_world();
     while(1) {
         draw();
         update();
-        swap(&current_surf, &tmp_surf);
+        swap();
     }
 }
