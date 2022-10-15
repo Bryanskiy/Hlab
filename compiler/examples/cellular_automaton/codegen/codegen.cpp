@@ -194,7 +194,7 @@ void init_world_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
     // br label %7, !llvm.loop !6
     builder->SetInsertPoint(id2bb[19]);
     id2value[20] = builder->CreateLoad(builder->getInt32Ty(), id2value[2]);
-    id2value[21] = builder->CreateNSWAdd(id2value[20], llvm::ConstantInt::get(builder->getInt64Ty(), 1));
+    id2value[21] = builder->CreateNSWAdd(id2value[20], llvm::ConstantInt::get(builder->getInt32Ty(), 1));
     builder->CreateStore(id2value[21], id2value[2]);
     builder->CreateBr(id2bb[7]);
 
@@ -210,7 +210,7 @@ void init_world_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
     // br label %3, !llvm.loop !8
     builder->SetInsertPoint(id2bb[23]);
     id2value[24] = builder->CreateLoad(builder->getInt32Ty(), id2value[1]);
-    id2value[25] = builder->CreateNSWAdd(id2value[24], llvm::ConstantInt::get(builder->getInt64Ty(), 1));
+    id2value[25] = builder->CreateNSWAdd(id2value[24], llvm::ConstantInt::get(builder->getInt32Ty(), 1));
     builder->CreateStore(id2value[25], id2value[1]);
     builder->CreateBr(id2bb[3]);
 
@@ -218,6 +218,98 @@ void init_world_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
     // ret void
     builder->SetInsertPoint(id2bb[26]);
     builder->CreateRetVoid();
+}
+
+void update_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
+    std::unordered_map<int, llvm::BasicBlock*> id2bb;
+    std::unordered_map<int, llvm::Value*> id2value;
+
+    auto&& updateFunc = module->getFunction("update");
+    
+    id2bb[0] = llvm::BasicBlock::Create(module->getContext(), "0", updateFunc);
+    id2bb[7] = llvm::BasicBlock::Create(module->getContext(), "7", updateFunc);
+    id2bb[10] = llvm::BasicBlock::Create(module->getContext(), "10", updateFunc);
+    id2bb[11] = llvm::BasicBlock::Create(module->getContext(), "11", updateFunc);
+    // %1 = alloca i32, align 4
+    // %2 = alloca i32, align 4
+    // %3 = alloca i32, align 4
+    // %4 = alloca i32, align 4
+    // %5 = alloca i32, align 4
+    // %6 = alloca i32, align 4
+    // store i32 0, i32* %1, align 4
+    // br label %7
+    builder->SetInsertPoint(id2bb[0]);
+    for(int i = 1; i <= 6; ++i) {
+        id2value[1] = builder->CreateAlloca(builder->getInt32Ty());
+    }
+    builder->CreateStore(llvm::ConstantInt::get(builder->getInt32Ty(), 0), id2value[1]);
+    builder->CreateBr(id2bb[7]);
+
+    // 7:                                                ; preds = %52, %0
+    // %8 = load i32, i32* %1, align 4
+    // %9 = icmp slt i32 %8, 600
+    // br i1 %9, label %10, label %55
+    builder->SetInsertPoint(id2bb[7]);
+    id2value[8] = builder->CreateLoad(builder->getInt32Ty(), id2value[1]);
+    id2value[9] = builder->CreateICmpSLT(id2value[8], llvm::ConstantInt::get(builder->getInt32Ty(), 600));
+    builder->CreateCondBr(id2value[9], id2bb[10], id2bb[55]);
+
+    // 10:                                               ; preds = %7
+    // store i32 0, i32* %2, align 4
+    // br label %11
+    builder->SetInsertPoint(id2bb[10]);
+    builder->CreateStore(llvm::ConstantInt::get(builder->getInt32Ty(), 0), id2value[0]);
+    builder->CreateBr(id2bb[11]);
+
+    // 11:                                               ; preds = %48, %10
+    // %12 = load i32, i32* %2, align 4
+    // %13 = icmp slt i32 %12, 400
+    // br i1 %13, label %14, label %51
+    builder->SetInsertPoint(id2bb[11]);
+    id2value[12] = builder->CreateLoad(builder->getInt32Ty(), id2value[2]);
+    id2value[13] = builder->CreateICmpSLT(id2value[12], llvm::ConstantInt::get(builder->getInt32Ty(), 400));
+    builder->CreateCondBr(id2value[13], id2bb[14], id2bb[51]);
+
+
+    // 14:                                               ; preds = %11
+    // %15 = load i32, i32* %1, align 4
+    // %16 = sext i32 %15 to i64
+    // %17 = getelementptr inbounds [600 x [400 x i32]], [600 x [400 x i32]]* @current_surf, i64 0, i64 %16
+    // %18 = load i32, i32* %2, align 4
+    // %19 = sext i32 %18 to i64
+    // %20 = getelementptr inbounds [400 x i32], [400 x i32]* %17, i64 0, i64 %19
+    // %21 = load i32, i32* %20, align 4
+    // store i32 %21, i32* %3, align 4
+    // %22 = load i32, i32* %3, align 4
+    // %23 = icmp eq i32 %22, 0
+    // br i1 %23, label %24, label %25
+    id2value[15] = builder->CreateLoad(builder->getInt32Ty(), id2value[1]);
+    id2value[16] = builder->CreateSExt(id2value[15], builder->getInt64Ty());
+    auto&& current_surf = module->getGlobalVariable("current_surf");
+    id2value[15] = builder->CreateGEP(
+        current_surf->getValueType(),
+        current_surf,
+        {        
+            llvm::ConstantInt::get(builder->getInt64Ty(), 0),
+            id2value[16]
+        }
+    );
+    id2value[18] = builder->CreateLoad(builder->getInt32Ty(), id2value[2]);
+    id2value[19] = builder->CreateSExt(id2value[18], builder->getInt64Ty());
+    id2value[20] = builder->CreateGEP(
+        llvm::ArrayType::get(builder->getInt32Ty(), 400),
+        id2value[17],
+        {
+            llvm::ConstantInt::get(builder->getInt64Ty(), 0),
+            id2value[19] 
+        }
+    );
+    id2value[21] = builder->CreateLoad(builder->getInt32Ty(), id2value[20]);
+    builder->CreateStore(id2value[21], id2value[3]);
+    id2value[22] = builder->CreateLoad(builder->getInt32Ty(), id2value[3]);
+    id2value[23] = builder->CreateICmpEQ(id2value[22], llvm::ConstantInt::get(builder->getInt32Ty(), 0));
+    builder->CreateCondBr(id2value[23], id2bb[24], id2bb[25]);
+    
 }
 
 void neighbors_count_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
@@ -245,15 +337,6 @@ void draw_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
     auto&& drawFunc = module->getFunction("draw");
     
     id2bb[0] = llvm::BasicBlock::Create(module->getContext(), "0", drawFunc);
-}
-
-void update_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
-    std::unordered_map<int, llvm::BasicBlock*> id2bb;
-    std::unordered_map<int, llvm::Value*> id2value;
-
-    auto&& updateFunc = module->getFunction("update");
-    
-    id2bb[0] = llvm::BasicBlock::Create(module->getContext(), "0", updateFunc);
 }
 
 void run(llvm::Module* module) {
