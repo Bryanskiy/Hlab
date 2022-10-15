@@ -1,11 +1,19 @@
 #include <iostream>
 #include <fstream>
-#include "llvm/Support/raw_ostream.h"
+
+#include "../draw.h"
+
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/GlobalValue.h"
 #include "llvm/IR/Constants.h"
+#include "llvm/ExecutionEngine/ExecutionEngine.h"
+#include "llvm/ExecutionEngine/GenericValue.h"
+#include "llvm/IR/Verifier.h"
+#include "llvm/Support/TargetSelect.h"
+#include "llvm/Support/raw_ostream.h"
+#include "llvm/Support/raw_ostream.h"
 
 void dump_codegen(llvm::Module* module) {
     std::string s;
@@ -41,16 +49,16 @@ void main_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
     builder->SetInsertPoint(loop);
 
     // call @draw
-    auto drawFunc = module->getFunction("draw");
-    builder->CreateCall(drawFunc->getFunctionType(), module->getFunction("draw"));
+    auto&& drawFunc = module->getFunction("draw");
+    builder->CreateCall(drawFunc->getFunctionType(), drawFunc);
 
     // call @update
-    auto updateFunc = module->getFunction("draw");
-    builder->CreateCall(updateFunc->getFunctionType(), module->getFunction("update"));
+    auto&& updateFunc = module->getFunction("update");
+    builder->CreateCall(updateFunc->getFunctionType(), updateFunc);
 
     // call @swap
-    auto swapFunc = module->getFunction("draw");
-    builder->CreateCall(swapFunc->getFunctionType(), module->getFunction("swap"));
+    auto&& swapFunc = module->getFunction("swap");
+    builder->CreateCall(swapFunc->getFunctionType(), swapFunc);
 
     builder->CreateBr(loop);
 }
@@ -66,10 +74,28 @@ void create_declarations(llvm::Module* module, llvm::IRBuilder<>* builder) {
     llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, "update", module);
     llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, "swap", module);
 
+    llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, "dr_flush", module);
+
+    funcType = llvm::FunctionType::get(builder->getInt32Ty(), false);
+    llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, "dr_rand", module);
+
     // declare @dr_init_window
     funcType = llvm::FunctionType::get(builder->getVoidTy(), {builder->getInt32Ty(), builder->getInt32Ty()}, false);
-    llvm::Function *dr_init_window =
-        llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, "dr_init_window", module);
+    llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, "dr_init_window", module);
+
+    // declare @dr_put_pixel
+    funcType = llvm::FunctionType::get(
+        builder->getVoidTy(), 
+        {
+            builder->getInt32Ty(), 
+            builder->getInt32Ty(), 
+            builder->getInt32Ty()
+        }, 
+        false
+    );
+    llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, "dr_put_pixel", module);
+
+    llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, "neighbors_count", module);
 }
 
 void init_world_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
@@ -135,6 +161,128 @@ void init_world_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
     // store i32 %12, i32* %18, align 4
     // br label %19
     builder->SetInsertPoint(id2bb[10]);
+    auto&& dr_randFunc = module->getFunction("dr_rand");
+    id2value[11] = builder->CreateCall(dr_randFunc->getFunctionType(), dr_randFunc);
+    id2value[12] = builder->CreateSRem(id2value[11], llvm::ConstantInt::get(builder->getInt32Ty(), 16));
+    id2value[13] = builder->CreateLoad(builder->getInt32Ty(), id2value[1]);
+    id2value[14] = builder->CreateSExt(id2value[13], builder->getInt64Ty());
+    /*
+    auto&& current_surf = module->getGlobalVariable("current_surf");
+    id2value[15] = builder->CreateGEP(
+        current_surf->getType(),
+        current_surf,
+        {        
+            llvm::ConstantInt::get(builder->getInt64Ty(), 0),
+            id2value[14]
+        }
+    );
+    id2value[16] = builder->CreateLoad(builder->getInt32Ty(), id2value[2]);
+    id2value[17] = builder->CreateSExt(id2value[16], builder->getInt64Ty());
+    id2value[18] = builder->CreateGEP(
+        llvm::ArrayType::get(builder->getInt32Ty(), 400),
+        id2value[15],
+        {
+            llvm::ConstantInt::get(builder->getInt64Ty(), 0),
+            id2value[17] 
+        }
+    );
+    builder->CreateStore(id2value[12], id2value[18]);
+    builder->CreateBr(id2bb[19]);
+
+    // 19:                                               ; preds = %10
+    // %20 = load i32, i32* %2, align 4
+    // %21 = add nsw i32 %20, 1
+    // store i32 %21, i32* %2, align 4
+    // br label %7, !llvm.loop !6
+    builder->SetInsertPoint(id2bb[19]);
+    id2value[20] = builder->CreateLoad(builder->getInt32Ty(), id2value[2]);
+    id2value[21] = builder->CreateNSWAdd(id2value[20], llvm::ConstantInt::get(builder->getInt64Ty(), 1));
+    builder->CreateStore(id2value[21], id2value[2]);
+    builder->CreateBr(id2bb[7]);
+
+    // 22:                                               ; preds = %7
+    // br label %23
+    builder->SetInsertPoint(id2bb[22]);
+    builder->CreateBr(id2bb[23]);
+
+    // 23:                                               ; preds = %22
+    // %24 = load i32, i32* %1, align 4
+    // %25 = add nsw i32 %24, 1
+    // store i32 %25, i32* %1, align 4
+    // br label %3, !llvm.loop !8
+    builder->SetInsertPoint(id2bb[22]);
+    id2value[24] = builder->CreateLoad(builder->getInt32Ty(), id2value[1]);
+    id2value[25] = builder->CreateNSWAdd(id2value[24], llvm::ConstantInt::get(builder->getInt64Ty(), 1));
+    builder->CreateStore(id2value[25], id2value[1]);
+    builder->CreateBr(id2bb[3]);
+
+    // 26:                                               ; preds = %3
+    // ret void
+    builder->SetInsertPoint(id2bb[26]);
+    builder->CreateRetVoid();
+    */
+}
+
+void neighbors_count_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
+    std::unordered_map<int, llvm::BasicBlock*> id2bb;
+    std::unordered_map<int, llvm::Value*> id2value;
+
+    auto&& neighbors_countFunc = module->getFunction("neighbors_count");
+    
+    id2bb[0] = llvm::BasicBlock::Create(module->getContext(), "0", neighbors_countFunc);
+}
+
+void swap_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
+    std::unordered_map<int, llvm::BasicBlock*> id2bb;
+    std::unordered_map<int, llvm::Value*> id2value;
+
+    auto&& swapFunc = module->getFunction("swap");
+    
+    id2bb[0] = llvm::BasicBlock::Create(module->getContext(), "0", swapFunc);
+}
+
+void draw_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
+    std::unordered_map<int, llvm::BasicBlock*> id2bb;
+    std::unordered_map<int, llvm::Value*> id2value;
+
+    auto&& drawFunc = module->getFunction("draw");
+    
+    id2bb[0] = llvm::BasicBlock::Create(module->getContext(), "0", drawFunc);
+}
+
+void update_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
+    std::unordered_map<int, llvm::BasicBlock*> id2bb;
+    std::unordered_map<int, llvm::Value*> id2value;
+
+    auto&& updateFunc = module->getFunction("update");
+    
+    id2bb[0] = llvm::BasicBlock::Create(module->getContext(), "0", updateFunc);
+}
+
+void run(llvm::Module* module) {
+    llvm::ExecutionEngine *ee =
+        llvm::EngineBuilder(std::unique_ptr<llvm::Module>(module)).create();
+
+    ee->InstallLazyFunctionCreator([&](const std::string &fnName) -> void * {
+    if (fnName == "dr_init_window") {
+        return reinterpret_cast<void *>(dr_init_window);
+    }
+    if (fnName == "dr_put_pixel") {
+        return reinterpret_cast<void *>(dr_put_pixel);
+    }
+    if (fnName == "dr_flush") {
+        return reinterpret_cast<void *>(dr_flush);
+    }
+    if (fnName == "dr_rand") {
+        return reinterpret_cast<void *>(dr_rand);
+    }
+    return nullptr;
+    });
+
+    ee->finalizeObject();
+    std::vector<llvm::GenericValue> noargs;
+    auto&& mainFunc = module->getFunction("main");
+    ee->runFunction(mainFunc, noargs);
 }
 
 int main()
@@ -155,6 +303,7 @@ int main()
     main_codegen(module, &builder);
     init_world_codegen(module, &builder);
     dump_codegen(module);
+    run(module);
 
     return 0;
 }
