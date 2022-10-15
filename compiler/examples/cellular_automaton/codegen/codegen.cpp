@@ -166,10 +166,9 @@ void init_world_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
     id2value[12] = builder->CreateSRem(id2value[11], llvm::ConstantInt::get(builder->getInt32Ty(), 16));
     id2value[13] = builder->CreateLoad(builder->getInt32Ty(), id2value[1]);
     id2value[14] = builder->CreateSExt(id2value[13], builder->getInt64Ty());
-    /*
     auto&& current_surf = module->getGlobalVariable("current_surf");
     id2value[15] = builder->CreateGEP(
-        current_surf->getType(),
+        current_surf->getValueType(),
         current_surf,
         {        
             llvm::ConstantInt::get(builder->getInt64Ty(), 0),
@@ -188,7 +187,6 @@ void init_world_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
     );
     builder->CreateStore(id2value[12], id2value[18]);
     builder->CreateBr(id2bb[19]);
-
     // 19:                                               ; preds = %10
     // %20 = load i32, i32* %2, align 4
     // %21 = add nsw i32 %20, 1
@@ -210,7 +208,7 @@ void init_world_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
     // %25 = add nsw i32 %24, 1
     // store i32 %25, i32* %1, align 4
     // br label %3, !llvm.loop !8
-    builder->SetInsertPoint(id2bb[22]);
+    builder->SetInsertPoint(id2bb[23]);
     id2value[24] = builder->CreateLoad(builder->getInt32Ty(), id2value[1]);
     id2value[25] = builder->CreateNSWAdd(id2value[24], llvm::ConstantInt::get(builder->getInt64Ty(), 1));
     builder->CreateStore(id2value[25], id2value[1]);
@@ -220,7 +218,6 @@ void init_world_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
     // ret void
     builder->SetInsertPoint(id2bb[26]);
     builder->CreateRetVoid();
-    */
 }
 
 void neighbors_count_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
