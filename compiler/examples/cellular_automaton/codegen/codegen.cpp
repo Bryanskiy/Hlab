@@ -230,6 +230,17 @@ void update_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
     id2bb[7] = llvm::BasicBlock::Create(module->getContext(), "7", updateFunc);
     id2bb[10] = llvm::BasicBlock::Create(module->getContext(), "10", updateFunc);
     id2bb[11] = llvm::BasicBlock::Create(module->getContext(), "11", updateFunc);
+    id2bb[14] = llvm::BasicBlock::Create(module->getContext(), "14", updateFunc);
+    id2bb[24] = llvm::BasicBlock::Create(module->getContext(), "24", updateFunc);
+    id2bb[25] = llvm::BasicBlock::Create(module->getContext(), "25", updateFunc);
+    id2bb[28] = llvm::BasicBlock::Create(module->getContext(), "28", updateFunc);
+    id2bb[36] = llvm::BasicBlock::Create(module->getContext(), "36", updateFunc);
+    id2bb[38] = llvm::BasicBlock::Create(module->getContext(), "38", updateFunc);
+    id2bb[40] = llvm::BasicBlock::Create(module->getContext(), "40", updateFunc);
+    id2bb[48] = llvm::BasicBlock::Create(module->getContext(), "48", updateFunc);
+    id2bb[51] = llvm::BasicBlock::Create(module->getContext(), "51", updateFunc);
+    id2bb[52] = llvm::BasicBlock::Create(module->getContext(), "52", updateFunc);
+    id2bb[55] = llvm::BasicBlock::Create(module->getContext(), "55", updateFunc);
     // %1 = alloca i32, align 4
     // %2 = alloca i32, align 4
     // %3 = alloca i32, align 4
@@ -240,7 +251,7 @@ void update_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
     // br label %7
     builder->SetInsertPoint(id2bb[0]);
     for(int i = 1; i <= 6; ++i) {
-        id2value[1] = builder->CreateAlloca(builder->getInt32Ty());
+        id2value[i] = builder->CreateAlloca(builder->getInt32Ty());
     }
     builder->CreateStore(llvm::ConstantInt::get(builder->getInt32Ty(), 0), id2value[1]);
     builder->CreateBr(id2bb[7]);
@@ -258,7 +269,7 @@ void update_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
     // store i32 0, i32* %2, align 4
     // br label %11
     builder->SetInsertPoint(id2bb[10]);
-    builder->CreateStore(llvm::ConstantInt::get(builder->getInt32Ty(), 0), id2value[0]);
+    builder->CreateStore(llvm::ConstantInt::get(builder->getInt32Ty(), 0), id2value[2]);
     builder->CreateBr(id2bb[11]);
 
     // 11:                                               ; preds = %48, %10
@@ -269,7 +280,6 @@ void update_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
     id2value[12] = builder->CreateLoad(builder->getInt32Ty(), id2value[2]);
     id2value[13] = builder->CreateICmpSLT(id2value[12], llvm::ConstantInt::get(builder->getInt32Ty(), 400));
     builder->CreateCondBr(id2value[13], id2bb[14], id2bb[51]);
-
 
     // 14:                                               ; preds = %11
     // %15 = load i32, i32* %1, align 4
@@ -283,10 +293,11 @@ void update_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
     // %22 = load i32, i32* %3, align 4
     // %23 = icmp eq i32 %22, 0
     // br i1 %23, label %24, label %25
+    builder->SetInsertPoint(id2bb[14]);
     id2value[15] = builder->CreateLoad(builder->getInt32Ty(), id2value[1]);
     id2value[16] = builder->CreateSExt(id2value[15], builder->getInt64Ty());
     auto&& current_surf = module->getGlobalVariable("current_surf");
-    id2value[15] = builder->CreateGEP(
+    id2value[17] = builder->CreateGEP(
         current_surf->getValueType(),
         current_surf,
         {        
@@ -309,7 +320,134 @@ void update_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
     id2value[22] = builder->CreateLoad(builder->getInt32Ty(), id2value[3]);
     id2value[23] = builder->CreateICmpEQ(id2value[22], llvm::ConstantInt::get(builder->getInt32Ty(), 0));
     builder->CreateCondBr(id2value[23], id2bb[24], id2bb[25]);
-    
+
+    // 24:                                               ; preds = %14
+    // br label %28
+    builder->SetInsertPoint(id2bb[24]);
+    builder->CreateBr(id2bb[28]);
+
+    // 25:                                               ; preds = %14
+    // %26 = load i32, i32* %3, align 4
+    // %27 = sub nsw i32 %26, 1
+    // br label %28
+    builder->SetInsertPoint(id2bb[25]);
+    id2value[26] = builder->CreateLoad(builder->getInt32Ty(), id2value[3]);
+    id2value[27] = builder->CreateNSWSub(id2value[26], llvm::ConstantInt::get(builder->getInt32Ty(), 1));
+    builder->CreateBr(id2bb[28]); 
+
+    // 28:                                               ; preds = %25, %24
+    // %29 = phi i32 [ 15, %24 ], [ %27, %25 ]
+    // store i32 %29, i32* %4, align 4
+    // %30 = load i32, i32* %1, align 4
+    // %31 = load i32, i32* %2, align 4
+    // %32 = load i32, i32* %4, align 4
+    // %33 = call i32 @neighbors_count(i32 noundef %30, i32 noundef %31, i32 noundef %32)
+    // store i32 %33, i32* %5, align 4
+    // %34 = load i32, i32* %5, align 4
+    // %35 = icmp sge i32 %34, 1
+    // br i1 %35, label %36, label %38
+    builder->SetInsertPoint(id2bb[28]);
+    auto&& phiNode = builder->CreatePHI(builder->getInt32Ty(), 2);
+    phiNode->addIncoming(llvm::ConstantInt::get(builder->getInt32Ty(), 15), id2bb[24]);
+    phiNode->addIncoming(id2value[27], id2bb[25]);
+    id2value[29] = phiNode;
+    builder->CreateStore(id2value[29], id2value[4]);
+    id2value[30] = builder->CreateLoad(builder->getInt32Ty(), id2value[1]);
+    id2value[31] = builder->CreateLoad(builder->getInt32Ty(), id2value[2]);
+    id2value[32] = builder->CreateLoad(builder->getInt32Ty(), id2value[4]);
+    auto&& neighborsCountFunc = module->getFunction("neighbors_count");
+    id2value[33] = builder->CreateCall(neighborsCountFunc->getFunctionType(), neighborsCountFunc);
+    /*
+    builder->CreateStore(id2value[33], id2value[5]);
+    id2value[34] = builder->CreateLoad(builder->getInt32Ty(), id2value[5]);
+    id2value[35] = builder->CreateICmpSGE(id2value[34], llvm::ConstantInt::get(builder->getInt32Ty(), 1));
+    builder->CreateCondBr(id2value[35], id2bb[36], id2bb[38]);
+    // 36:                                               ; preds = %28
+    // %37 = load i32, i32* %4, align 4
+    // store i32 %37, i32* %6, align 4
+    // br label %40
+    builder->SetInsertPoint(id2bb[36]);
+    id2value[37] = builder->CreateLoad(builder->getInt32Ty(), id2value[4]);
+    builder->CreateStore(id2value[37], id2value[6]);
+    builder->CreateBr(id2bb[40]);
+
+    // 38:                                               ; preds = %28
+    // %39 = load i32, i32* %3, align 4
+    // store i32 %39, i32* %6, align 4
+    // br label %40
+    builder->SetInsertPoint(id2bb[38]);
+    id2value[39] = builder->CreateLoad(builder->getInt32Ty(), id2value[3]);
+    builder->CreateStore(id2value[39], id2value[6]);
+    builder->CreateBr(id2bb[40]);
+
+    // 40:                                               ; preds = %38, %36
+    // %41 = load i32, i32* %6, align 4
+    // %42 = load i32, i32* %1, align 4
+    // %43 = sext i32 %42 to i64
+    // %44 = getelementptr inbounds [600 x [400 x i32]], [600 x [400 x i32]]* @tmp_surf, i64 0, i64 %43
+    // %45 = load i32, i32* %2, align 4
+    // %46 = sext i32 %45 to i64
+    // %47 = getelementptr inbounds [400 x i32], [400 x i32]* %44, i64 0, i64 %46
+    // store i32 %41, i32* %47, align 4
+    // br label %48
+    builder->SetInsertPoint(id2bb[40]);
+    id2value[41] = builder->CreateLoad(builder->getInt32Ty(), id2value[6]);
+    id2value[42] = builder->CreateLoad(builder->getInt32Ty(), id2value[1]);
+    id2value[43] = builder->CreateSExt(id2value[42], builder->getInt64Ty());
+    auto&& tmp_surf = module->getGlobalVariable("tmp_surf");
+    id2value[44] = builder->CreateGEP(
+        tmp_surf->getValueType(),
+        tmp_surf,
+        {        
+            llvm::ConstantInt::get(builder->getInt64Ty(), 0),
+            id2value[43]
+        }
+    );
+    id2value[45] = builder->CreateLoad(builder->getInt32Ty(), id2value[2]);
+    id2value[46] = builder->CreateSExt(id2value[45], builder->getInt64Ty());
+    id2value[47] = builder->CreateGEP(
+        llvm::ArrayType::get(builder->getInt32Ty(), 400),
+        id2value[44],
+        {
+            llvm::ConstantInt::get(builder->getInt64Ty(), 0),
+            id2value[46] 
+        }
+    );
+    builder->CreateStore(id2value[41], id2value[47]);
+    builder->CreateBr(id2bb[48]);
+
+    // 48:                                               ; preds = %40
+    // %49 = load i32, i32* %2, align 4
+    // %50 = add nsw i32 %49, 1
+    // store i32 %50, i32* %2, align 4
+    // br label %11, !llvm.loop !9
+    builder->SetInsertPoint(id2bb[48]);
+    id2value[49] = builder->CreateLoad(builder->getInt32Ty(), id2value[2]);       
+    id2value[50] = builder->CreateNSWAdd(id2value[49], llvm::ConstantInt::get(builder->getInt32Ty(), 1));
+    builder->CreateStore(id2value[50], id2value[2]);
+    builder->CreateBr(id2bb[11]);
+
+    // 51:                                               ; preds = %11
+    // br label %52
+    builder->SetInsertPoint(id2bb[51]);
+    builder->CreateBr(id2bb[52]); 
+
+    // 52:                                               ; preds = %51
+    // %53 = load i32, i32* %1, align 4
+    // %54 = add nsw i32 %53, 1
+    // store i32 %54, i32* %1, align 4
+    // br label %7, !llvm.loop !10
+    builder->SetInsertPoint(id2bb[52]);
+    id2value[53] = builder->CreateLoad(builder->getInt32Ty(), id2value[1]);
+    id2value[54] = builder->CreateNSWAdd(id2value[53], llvm::ConstantInt::get(builder->getInt32Ty(), 1));
+    builder->CreateStore(id2value[54], id2value[1]);
+    builder->CreateBr(id2bb[7]); 
+
+    // 55:                                               ; preds = %7
+    // ret void
+    builder->SetInsertPoint(id2bb[55]);
+    builder->CreateRetVoid();
+    */
 }
 
 void neighbors_count_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
@@ -382,8 +520,9 @@ int main()
     create_declarations(module, &builder);
     main_codegen(module, &builder);
     init_world_codegen(module, &builder);
+    update_codegen(module, &builder);
     dump_codegen(module);
-    run(module);
+    // run(module);
 
     return 0;
 }
