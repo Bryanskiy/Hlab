@@ -39,7 +39,7 @@ extern "C" {
 
     void dr_put_pixel(int x, int y, STATE state) {
         sf::Color color = match_color(state);
-        sf::Vertex point({x, y}, color);
+        sf::Vertex point({static_cast<float>(x), static_cast<float>(y)}, color);
         window.draw(&point, 1, sf::Points);
     }
 

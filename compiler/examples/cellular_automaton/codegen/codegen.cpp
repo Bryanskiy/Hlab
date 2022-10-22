@@ -95,6 +95,15 @@ void create_declarations(llvm::Module* module, llvm::IRBuilder<>* builder) {
     );
     llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, "dr_put_pixel", module);
 
+    funcType = llvm::FunctionType::get(
+        builder->getInt32Ty(), 
+        {
+            builder->getInt32Ty(), 
+            builder->getInt32Ty(), 
+            builder->getInt32Ty()
+        }, 
+        false
+    );
     llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, "neighbors_count", module);
 }
 
@@ -356,8 +365,14 @@ void update_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
     id2value[31] = builder->CreateLoad(builder->getInt32Ty(), id2value[2]);
     id2value[32] = builder->CreateLoad(builder->getInt32Ty(), id2value[4]);
     auto&& neighborsCountFunc = module->getFunction("neighbors_count");
-    id2value[33] = builder->CreateCall(neighborsCountFunc->getFunctionType(), neighborsCountFunc);
-    /*
+    id2value[33] = builder->CreateCall(
+        neighborsCountFunc->getFunctionType(),
+        neighborsCountFunc,
+        {
+            id2value[30],
+            id2value[31],
+            id2value[32],
+        });
     builder->CreateStore(id2value[33], id2value[5]);
     id2value[34] = builder->CreateLoad(builder->getInt32Ty(), id2value[5]);
     id2value[35] = builder->CreateICmpSGE(id2value[34], llvm::ConstantInt::get(builder->getInt32Ty(), 1));
@@ -426,7 +441,7 @@ void update_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
     id2value[50] = builder->CreateNSWAdd(id2value[49], llvm::ConstantInt::get(builder->getInt32Ty(), 1));
     builder->CreateStore(id2value[50], id2value[2]);
     builder->CreateBr(id2bb[11]);
-
+    
     // 51:                                               ; preds = %11
     // br label %52
     builder->SetInsertPoint(id2bb[51]);
@@ -447,7 +462,6 @@ void update_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
     // ret void
     builder->SetInsertPoint(id2bb[55]);
     builder->CreateRetVoid();
-    */
 }
 
 void neighbors_count_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
