@@ -469,8 +469,150 @@ void neighbors_count_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
     std::unordered_map<int, llvm::Value*> id2value;
 
     auto&& neighbors_countFunc = module->getFunction("neighbors_count");
-    
+    id2value[0] = neighbors_countFunc->getArg(0);
+    id2value[1] = neighbors_countFunc->getArg(1);
+    id2value[2] = neighbors_countFunc->getArg(2);
+
     id2bb[0] = llvm::BasicBlock::Create(module->getContext(), "0", neighbors_countFunc);
+    id2bb[12] = llvm::BasicBlock::Create(module->getContext(), "12", neighbors_countFunc);
+    id2bb[17] = llvm::BasicBlock::Create(module->getContext(), "17", neighbors_countFunc);    
+    id2bb[68] = llvm::BasicBlock::Create(module->getContext(), "68", neighbors_countFunc);    
+    id2bb[20] = llvm::BasicBlock::Create(module->getContext(), "20", neighbors_countFunc);       
+    id2bb[25] = llvm::BasicBlock::Create(module->getContext(), "25", neighbors_countFunc);    
+    id2bb[64] = llvm::BasicBlock::Create(module->getContext(), "64", neighbors_countFunc);   
+    id2bb[29] = llvm::BasicBlock::Create(module->getContext(), "29", neighbors_countFunc);   
+    id2bb[34] = llvm::BasicBlock::Create(module->getContext(), "34", neighbors_countFunc);   
+    id2bb[33] = llvm::BasicBlock::Create(module->getContext(), "33", neighbors_countFunc);
+    id2bb[61] = llvm::BasicBlock::Create(module->getContext(), "61", neighbors_countFunc); 
+    id2bb[46] = llvm::BasicBlock::Create(module->getContext(), "46", neighbors_countFunc);      
+    id2bb[37] = llvm::BasicBlock::Create(module->getContext(), "37", neighbors_countFunc);  
+    id2bb[40] = llvm::BasicBlock::Create(module->getContext(), "40", neighbors_countFunc);     
+    id2bb[43] = llvm::BasicBlock::Create(module->getContext(), "43", neighbors_countFunc);         
+    // %4 = alloca i32, align 4
+    // %5 = alloca i32, align 4
+    // %6 = alloca i32, align 4
+    // %7 = alloca i32, align 4
+    // %8 = alloca i32, align 4
+    // %9 = alloca i32, align 4
+    // store i32 %0, i32* %4, align 4
+    // store i32 %1, i32* %5, align 4
+    // store i32 %2, i32* %6, align 4
+    // store i32 0, i32* %7, align 4
+    // %10 = load i32, i32* %4, align 4
+    // %11 = sub nsw i32 %10, 1
+    // store i32 %11, i32* %8, align 4
+    // br label %12
+    builder->SetInsertPoint(id2bb[0]);
+    id2value[4] = builder->CreateAlloca(builder->getInt32Ty());
+    id2value[5] = builder->CreateAlloca(builder->getInt32Ty());
+    id2value[6] = builder->CreateAlloca(builder->getInt32Ty());
+    id2value[7] = builder->CreateAlloca(builder->getInt32Ty());
+    id2value[8] = builder->CreateAlloca(builder->getInt32Ty());
+    id2value[9] = builder->CreateAlloca(builder->getInt32Ty());
+    builder->CreateStore(id2value[0], id2value[4]);
+    builder->CreateStore(id2value[1], id2value[5]);
+    builder->CreateStore(id2value[2], id2value[6]);        
+    builder->CreateStore(llvm::ConstantInt::get(builder->getInt32Ty(), 0), id2value[7]);
+    id2value[10] = builder->CreateLoad(builder->getInt32Ty(), id2value[4]);
+    id2value[11] = builder->CreateNSWSub(id2value[10], builder->getInt32(1));
+    builder->CreateStore(id2value[11], id2value[8]);
+    builder->CreateBr(id2bb[12]);    
+
+    // 12:                                               ; preds = %65, %3
+    // %13 = load i32, i32* %8, align 4
+    // %14 = load i32, i32* %4, align 4
+    // %15 = add nsw i32 %14, 1
+    // %16 = icmp sle i32 %13, %15
+    // br i1 %16, label %17, label %68
+    builder->SetInsertPoint(id2bb[12]);
+    id2value[13] = builder->CreateLoad(builder->getInt32Ty(), id2value[8]);
+    id2value[14] = builder->CreateLoad(builder->getInt32Ty(), id2value[4]);
+    id2value[15] = builder->CreateNSWAdd(id2value[14], builder->getInt32(1));
+    id2value[16] = builder->CreateICmpSLE(id2value[13], id2value[15]);
+    builder->CreateCondBr(id2value[16], id2bb[17], id2bb[68]);    
+
+    // 17:                                               ; preds = %12
+    // %18 = load i32, i32* %5, align 4
+    // %19 = sub nsw i32 %18, 1
+    // store i32 %19, i32* %9, align 4
+    // br label %20
+    builder->SetInsertPoint(id2bb[17]);
+    id2value[18] = builder->CreateLoad(builder->getInt32Ty(), id2value[5]);
+    id2value[19] = builder->CreateNSWSub(id2value[18], builder->getInt32(1));
+    builder->CreateStore(id2value[19], id2value[9]);
+    builder->CreateBr(id2bb[20]);
+
+    // 20:                                               ; preds = %61, %17
+    // %21 = load i32, i32* %9, align 4
+    // %22 = load i32, i32* %5, align 4
+    // %23 = add nsw i32 %22, 1
+    // %24 = icmp sle i32 %21, %23
+    // br i1 %24, label %25, label %64    
+    builder->SetInsertPoint(id2bb[20]);
+    id2value[21] = builder->CreateLoad(builder->getInt32Ty(), id2value[9]);
+    id2value[22] = builder->CreateLoad(builder->getInt32Ty(), id2value[5]);
+    id2value[23] = builder->CreateNSWAdd(id2value[22], builder->getInt32(1));
+    id2value[24] = builder->CreateICmpSLE(id2value[21], id2value[23]);
+    builder->CreateCondBr(id2value[24], id2bb[25], id2bb[64]);    
+
+    // 25:                                               ; preds = %20
+    // %26 = load i32, i32* %8, align 4
+    // %27 = load i32, i32* %4, align 4
+    // %28 = icmp eq i32 %26, %27
+    // br i1 %28, label %29, label %34
+    builder->SetInsertPoint(id2bb[25]);
+    id2value[26] = builder->CreateLoad(builder->getInt32Ty(), id2value[8]);
+    id2value[27] = builder->CreateLoad(builder->getInt32Ty(), id2value[4]);
+    id2value[28] = builder->CreateICmpEQ(id2value[26], id2value[27]);
+    builder->CreateCondBr(id2value[28], id2bb[29], id2bb[34]);
+
+    // 29:                                               ; preds = %25
+    // %30 = load i32, i32* %9, align 4
+    // %31 = load i32, i32* %5, align 4
+    // %32 = icmp eq i32 %30, %31
+    // br i1 %32, label %33, label %34
+    builder->SetInsertPoint(id2bb[29]);
+    id2value[30] = builder->CreateLoad(builder->getInt32Ty(), id2value[9]);
+    id2value[31] = builder->CreateLoad(builder->getInt32Ty(), id2value[5]);
+    id2value[32] = builder->CreateICmpEQ(id2value[30], id2value[31]);
+    builder->CreateCondBr(id2value[32], id2bb[33], id2bb[34]); 
+
+    // 33:                                               ; preds = %29
+    // br label %61
+    builder->SetInsertPoint(id2bb[33]);
+    builder->CreateBr(id2bb[61]);    
+
+    // 34:                                               ; preds = %29, %25
+    // %35 = load i32, i32* %8, align 4
+    // %36 = icmp slt i32 %35, 0
+    // br i1 %36, label %46, label %37
+    builder->SetInsertPoint(id2bb[34]);
+    id2value[35] = builder->CreateLoad(builder->getInt32Ty(), id2value[8]);
+    id2value[36] = builder->CreateICmpSLT(id2value[35], builder->getInt32(0));
+    builder->CreateCondBr(id2value[36], id2bb[46], id2bb[37]); 
+
+    // 37:                                               ; preds = %34
+    // %38 = load i32, i32* %8, align 4
+    // %39 = icmp sge i32 %38, 600
+    // br i1 %39, label %46, label %40
+    builder->SetInsertPoint(id2bb[37]);
+    id2value[38] = builder->CreateLoad(builder->getInt32Ty(), id2value[8]);
+    id2value[39] = builder->CreateICmpSLT(id2value[38], builder->getInt32(600));
+    builder->CreateCondBr(id2value[39], id2bb[46], id2bb[40]); 
+
+    // 40:                                               ; preds = %37
+    // %41 = load i32, i32* %9, align 4
+    // %42 = icmp slt i32 %41, 0
+    // br i1 %42, label %46, label %43
+    builder->SetInsertPoint(id2bb[40]);
+    id2value[41] = builder->CreateLoad(builder->getInt32Ty(), id2value[9]);
+    id2value[42] = builder->CreateICmpSLT(id2value[41], builder->getInt32(0));
+    builder->CreateCondBr(id2value[42], id2bb[46], id2bb[43]); 
+
+    // 43:                                               ; preds = %40
+    // %44 = load i32, i32* %9, align 4
+    // %45 = icmp sge i32 %44, 400
+    // br i1 %45, label %46, label %47
 }
 
 void swap_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
@@ -661,6 +803,7 @@ int main()
     init_world_codegen(module, &builder);
     update_codegen(module, &builder);
     draw_codegen(module, &builder);
+    neighbors_count_codegen(module, &builder);
 
     dump_codegen(module);
     // run(module);
