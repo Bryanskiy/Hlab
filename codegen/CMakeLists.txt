@@ -14,7 +14,7 @@ separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
 add_definitions(${LLVM_DEFINITIONS_LIST})
 
 # Now build our tools
-add_executable(codegen codegen.cpp ../draw.cpp)
+add_executable(codegen codegen.cpp ../src/draw.cpp)
 
 # Find the libraries that correspond to the LLVM components
 # that we wish to use

@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "../draw.h"
+#include "../src/draw.h"
 
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
@@ -1065,32 +1065,6 @@ void draw_codegen(llvm::Module* module, llvm::IRBuilder<>* builder) {
     builder->CreateRetVoid();
 }
 
-void run(llvm::Module* module) {
-    llvm::ExecutionEngine *ee =
-        llvm::EngineBuilder(std::unique_ptr<llvm::Module>(module)).create();
-
-    ee->InstallLazyFunctionCreator([&](const std::string &fnName) -> void * {
-    if (fnName == "dr_init_window") {
-        return reinterpret_cast<void *>(dr_init_window);
-    }
-    if (fnName == "dr_put_pixel") {
-        return reinterpret_cast<void *>(dr_put_pixel);
-    }
-    if (fnName == "dr_flush") {
-        return reinterpret_cast<void *>(dr_flush);
-    }
-    if (fnName == "dr_rand") {
-        return reinterpret_cast<void *>(dr_rand);
-    }
-    return nullptr;
-    });
-
-    ee->finalizeObject();
-    std::vector<llvm::GenericValue> noargs;
-    auto&& mainFunc = module->getFunction("main");
-    ee->runFunction(mainFunc, noargs);
-}
-
 int main()
 {
     llvm::LLVMContext context;
@@ -1112,7 +1086,6 @@ int main()
     draw_codegen(module, &builder);
     neighbors_count_codegen(module, &builder);
     swap_codegen(module, &builder);
-
     dump_codegen(module);
     // run(module);
 
