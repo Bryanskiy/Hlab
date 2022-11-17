@@ -2,3 +2,5 @@ build
 .vscode
 *.o
 *.out
+Glang/parser/*.cc
+Glang/parser/*.hh
