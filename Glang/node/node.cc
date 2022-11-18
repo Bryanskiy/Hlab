@@ -2,6 +2,25 @@
 
 namespace glang {
 
+std::shared_ptr<DeclVarN> ScopeN::getDeclIfVisible(const std::string& name) const {
+    std::shared_ptr<DeclVarN> ret = nullptr;
+    auto&& it = m_symTable.find(name);
+    if(it != m_symTable.end()) {
+        return it->second;
+    }
+    if(m_parent) {
+        return m_parent->getDeclIfVisible(name);
+    }
+    return ret;
+}
+
+llvm::Value* ScopeN::codegen(CodeGenCtx& ctx) {
+    for(auto&& child : m_childs) {
+        child->codegen(ctx);
+    }
+    nullptr;
+}
+
 llvm::Value* I32N::codegen(CodeGenCtx& ctx) {
     return ctx.m_builder->getInt32(m_val);
 }

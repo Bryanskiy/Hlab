@@ -90,7 +90,9 @@ class ScopeN : public INode {
 public:
     void insertChild(std::shared_ptr<ScopeN> child) { m_childs.push_back(child); }
     std::shared_ptr<ScopeN> getParent() const { return m_parent; }
-    std::shared_ptr<DeclVarN> getDeclIfVisible() const;
+    std::shared_ptr<DeclVarN> getDeclIfVisible(const std::string& name) const;
+    void insertDecl(std::string& name, std::shared_ptr<DeclVarN> decl) { m_symTable[name] = decl; }
+    llvm::Value* codegen(CodeGenCtx& ctx) override;
 private:
     std::vector<std::shared_ptr<ScopeN>> m_childs;
     std::shared_ptr<ScopeN> m_parent;
