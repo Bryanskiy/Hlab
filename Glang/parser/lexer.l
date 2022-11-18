@@ -44,6 +44,6 @@ NAME [a-zA-Z][a-zA-Z0-9]*
 
 {WS}        
 {INTEGER}   return yy::parser::token_type::INTEGER;
-{NAME}      return yy::parser::token_type::NAME;
+{NAME}      return yy::parser::token_type::IDENTIFIER;
                 
 %%

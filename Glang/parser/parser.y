@@ -14,7 +14,7 @@
     namespace yy {parser::token_type yylex(parser::semantic_type* yylval, Driver* driver);}
 }
 
-%token <std::string> NAME 
+%token <std::string> IDENTIFIER 
 %token <int> INTEGER
 %token WHILE             "while"   
        INPUT              "?"
@@ -63,7 +63,7 @@ stm:        assign                              {};
 
 assign:     lval ASSIGN expr1 SCOLON            {};
 
-lval:       NAME                                {
+lval:       IDENTIFIER                          {
                                                 };
 
 expr1:       expr2 PLUS expr2                   {};
@@ -76,7 +76,7 @@ expr2:      expr3 MUL expr3                     {};
           | expr3                               {};
 
 expr3:      LRB expr1 RRB                       {}; 
-          | NAME                                {
+          | IDENTIFIER                          {
                                                 };
           | INTEGER                             {};
           | INPUT                               {};                  
