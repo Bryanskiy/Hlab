@@ -6,11 +6,14 @@
 
 %code requires {
     #include <string>
+    #include <memory>
     namespace yy { class Driver; }
+    namespace glang { class INode; class ScopeN; }
 }
 
 %code {
     #include "driver.hh"
+    #include "node.hh"
     namespace yy {parser::token_type yylex(parser::semantic_type* yylval, Driver* driver);}
 }
 
@@ -40,6 +43,22 @@
        MUL               "*"
        DIV               "/"
        MOD               "%"
+
+%nterm<std::shared_ptr<glang::ScopeN>> scope
+%nterm<std::shared_ptr<glang::ScopeN>> close_sc
+%nterm<std::shared_ptr<glang::INode>>  stm
+%nterm<std::shared_ptr<glang::INode>>  assign
+%nterm<std::shared_ptr<glang::INode>>  lval
+%nterm<std::shared_ptr<glang::INode>>  if 
+%nterm<std::shared_ptr<glang::INode>>  while
+%nterm<std::shared_ptr<glang::INode>>  expr1
+%nterm<std::shared_ptr<glang::INode>>  expr2
+%nterm<std::shared_ptr<glang::INode>>  expr3
+%nterm<std::shared_ptr<glang::INode>>  condition
+%nterm<std::shared_ptr<glang::INode>>  output 
+%nterm<std::shared_ptr<glang::INode>>  stms
+%nterm<std::shared_ptr<glang::INode>>  open_sc
+
 
 %%
 
