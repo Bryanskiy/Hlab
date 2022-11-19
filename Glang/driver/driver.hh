@@ -21,6 +21,8 @@ public:
 
     parser::token_type yylex(parser::semantic_type* yylval);
     bool parse();
+    void dumpIR(std::ostream& out);
+
     friend parser;
 private:
     std::unique_ptr<yyFlexLexer> m_lexer = nullptr;

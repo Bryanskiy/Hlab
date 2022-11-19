@@ -31,6 +31,10 @@ llvm::Value* I32N::codegen(CodeGenCtx& ctx) {
     return ctx.m_builder->getInt32(m_val);
 }
 
+llvm::Value* DeclVarN::codegen(CodeGenCtx& ctx) {
+    return ctx.m_builder->getInt32(m_val);
+}
+
 llvm::Value* BinOpN::codegen(CodeGenCtx& ctx) {
     llvm::Value* lhsCodeGen = m_lhs->codegen(ctx);
     llvm::Value* rhsCodeGen = m_rhs->codegen(ctx);

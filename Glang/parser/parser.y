@@ -93,14 +93,12 @@ stms:       stm                                 {
                                                     scope->insertChild($1);
                                                 };
 
-stm:        assign                              {$$ = $1;};
-          | if                                  {$$ = $1;};
-          | while                               {$$ = $1;};
-          | output                              {$$ = $1;};
+stm:        assign                              { $$ = $1; };
+          | if                                  { $$ = $1; };
+          | while                               { $$ = $1; };
+          | output                              { $$ = $1; };
 
-assign:     lval ASSIGN expr1 SCOLON            {
-                                                    $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Assign, $3);
-                                                };
+assign:     lval ASSIGN expr1 SCOLON            { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Assign, $3); };
 
 lval:       IDENTIFIER                          {
                                                     auto&& scope = driver->m_currentScope;
@@ -112,26 +110,30 @@ lval:       IDENTIFIER                          {
                                                     $$ = node;
                                                 };
 
-expr1:       expr2 PLUS expr2                   {};
-           | expr2 MINUS expr2                  {};
-           | expr2                              {};
+expr1:       expr2 PLUS expr2                   { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Plus, $3); };
+           | expr2 MINUS expr2                  { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Minus, $3); };
+           | expr2                              { $$ = $1; };
 
-expr2:      expr3 MUL expr3                     {};
-          | expr3 DIV expr3                     {};
-          | expr3 MOD expr3                     {};
-          | expr3                               {};
+expr2:      expr3 MUL expr3                     { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Mult, $3); };
+          | expr3 DIV expr3                     { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Div, $3); };
+          | expr3 MOD expr3                     { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Mod, $3); };
+          | expr3                               { $$ = $1; };
 
-expr3:      LRB expr1 RRB                       {}; 
+expr3:      LRB expr1 RRB                       { $$ = $2; }; 
           | IDENTIFIER                          {
+                                                    auto&& scope = driver->m_currentScope;
+                                                    auto&& node = scope->getDeclIfVisible($1);
+                                                    assert(node != nullptr);
+                                                    $$ = node;
                                                 };
-          | INTEGER                             {};
-          | INPUT                               {};                  
+          | INTEGER                             { $$ = std::make_shared<glang::I32N>($1); };
+          | INPUT                               { assert(0); };                  
 
-condition:  expr1 AND expr1                     {};
-          | expr1 OR expr1                      {};      
+condition:  expr1 AND expr1                     { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::And, $3); };
+          | expr1 OR expr1                      { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Or, $3); };      
           | NOT expr1                           {};    
-          | expr1 EQUAL expr1                   {};  
-          | expr1 NOT_EQUAL expr1               {};  
+          | expr1 EQUAL expr1                   { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Equal, $3); };  
+          | expr1 NOT_EQUAL expr1               { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::NotEqual, $3); };  
           | expr1 GREATER expr1                 {};  
           | expr1 LESS expr1                    {};  
           | expr1 GREATER_OR_EQUAL expr1        {};  

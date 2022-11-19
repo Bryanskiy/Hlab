@@ -27,4 +27,12 @@ parser::token_type Driver::yylex(parser::semantic_type* yylval) {
     return token;
 }
 
+void Driver::dumpIR(std::ostream& out) {
+    std::string s;
+    llvm::raw_string_ostream os(s);
+    m_codegenCtx.m_module->print(os, nullptr);
+    os.flush();
+    out << s;
+}
+
 } // namespace yy
