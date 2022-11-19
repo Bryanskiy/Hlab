@@ -141,15 +141,37 @@ llvm::Value* IfN::codegen(CodeGenCtx& ctx) {
     llvm::BasicBlock *notTaken = llvm::BasicBlock::Create(*context, "", glangStart);
 
     auto* conditionCodegen = m_condition->codegen(ctx);
-    
+
     builder->CreateCondBr(conditionCodegen, taken, notTaken);
     builder->SetInsertPoint(taken);
     m_block->codegen(ctx);
     builder->CreateBr(notTaken);
     builder->SetInsertPoint(notTaken);
+    return nullptr;
 }
 
 llvm::Value* WhileN::codegen(CodeGenCtx& ctx) {
+    auto&& module = ctx.m_module;
+    auto&& builder = ctx.m_builder;
+    auto&& context = ctx.m_context;
+
+    auto* glangStart = module->getFunction("__glang_start");
+    assert(glangStart && "Driver shall create decl for __glang_start");
+
+    llvm::BasicBlock *takenBB = llvm::BasicBlock::Create(*context, "", glangStart);
+    llvm::BasicBlock *notTakenBB = llvm::BasicBlock::Create(*context, "", glangStart);
+    llvm::BasicBlock *conditionBB = llvm::BasicBlock::Create(*context, "", glangStart);
+
+    builder->CreateBr(conditionBB);
+    builder->SetInsertPoint(conditionBB);
+    auto* conditionCodegen = m_condition->codegen(ctx);
+    builder->CreateCondBr(conditionCodegen, takenBB, notTakenBB);
+
+    builder->SetInsertPoint(takenBB);
+    auto* blockCodegen = m_block->codegen(ctx);
+    builder->CreateBr(conditionBB);
+
+    builder->SetInsertPoint(notTakenBB);
     return nullptr;
 }
 

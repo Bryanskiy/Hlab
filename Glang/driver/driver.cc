@@ -29,6 +29,7 @@ parser::token_type Driver::yylex(parser::semantic_type* yylval) {
 
 void Driver::codegen() {
     m_currentScope->codegen(m_codegenCtx);
+    m_codegenCtx.m_builder->CreateRetVoid();
 }
 
 void Driver::dumpIR(std::ostream& out) {
