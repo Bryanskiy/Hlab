@@ -129,4 +129,28 @@ llvm::Value* UnOpN::codegen(CodeGenCtx& ctx) {
     nullptr;
 }
 
+llvm::Value* IfN::codegen(CodeGenCtx& ctx) {
+    auto&& module = ctx.m_module;
+    auto&& builder = ctx.m_builder;
+    auto&& context = ctx.m_context;
+
+    auto* glangStart = module->getFunction("__glang_start");
+    assert(glangStart && "Driver shall create decl for __glang_start");
+
+    llvm::BasicBlock *taken = llvm::BasicBlock::Create(*context, "", glangStart);
+    llvm::BasicBlock *notTaken = llvm::BasicBlock::Create(*context, "", glangStart);
+
+    auto* conditionCodegen = m_condition->codegen(ctx);
+    
+    builder->CreateCondBr(conditionCodegen, taken, notTaken);
+    builder->SetInsertPoint(taken);
+    m_block->codegen(ctx);
+    builder->CreateBr(notTaken);
+    builder->SetInsertPoint(notTaken);
+}
+
+llvm::Value* WhileN::codegen(CodeGenCtx& ctx) {
+    return nullptr;
+}
+
 } // namespace glang

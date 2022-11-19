@@ -128,18 +128,18 @@ expr3:      LRB expr1 RRB                       { $$ = $2; };
 
 condition:  expr1 AND expr1                     { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::And, $3); };
           | expr1 OR expr1                      { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Or, $3); };      
-          | NOT expr1                           {};    
+          | NOT expr1                           { $$ = std::make_shared<glang::UnOpN>(glang::UnOp::Not, $2); };    
           | expr1 EQUAL expr1                   { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Equal, $3); };  
           | expr1 NOT_EQUAL expr1               { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::NotEqual, $3); };  
-          | expr1 GREATER expr1                 {};  
-          | expr1 LESS expr1                    {};  
-          | expr1 GREATER_OR_EQUAL expr1        {};  
-          | expr1 LESS_OR_EQUAL expr1           {};
-          | expr1                               {};
+          | expr1 GREATER expr1                 { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Greater, $3); };  
+          | expr1 LESS expr1                    { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Less, $3); };  
+          | expr1 GREATER_OR_EQUAL expr1        { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::GreaterOrEqual, $3); };  
+          | expr1 LESS_OR_EQUAL expr1           { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::LessOrEqual, $3); };
+          | expr1                               { $$ = $1; };
 
-if:        IF LRB condition RRB scope           {};
+if:        IF LRB condition RRB scope           { $$ = std::make_shared<glang::IfN>($5, $3); };
 
-while:     WHILE LRB condition RRB scope        {};
+while:     WHILE LRB condition RRB scope        { $$ = std::make_shared<glang::WhileN>($5, $3); };
 
 output:    OUTPUT expr1 SCOLON                  { $$ = std::make_shared<glang::UnOpN>(glang::UnOp::Output, $2); };
                          
