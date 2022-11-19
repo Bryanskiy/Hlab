@@ -62,10 +62,7 @@
 
 %%
 
-program:    stms                                {
-                                                    auto&& ctx = driver->m_codegenCtx;
-                                                    driver->m_currentScope->codegen(ctx);
-                                                };
+program:    stms                                { driver->codegen(); };
 
 scope:      open_sc stms close_sc               {$$ = $3;};
 

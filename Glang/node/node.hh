@@ -92,13 +92,10 @@ private:
 
 class DeclVarN : public INode {
 public:
-    DeclVarN(std::int32_t val) : m_val{val} {}
-    DeclVarN() = default;
-    void set(std::int32_t val) { m_val = val; }
-    std::int32_t get() const { return m_val; }
     llvm::Value* codegen(CodeGenCtx& ctx) override;
+    void set(llvm::Value* val) { m_val = val; }
 private:
-    std::int32_t m_val;
+    llvm::Value* m_val = nullptr;;
 };
 
 class ScopeN : public INode {

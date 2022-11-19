@@ -32,7 +32,8 @@ llvm::Value* I32N::codegen(CodeGenCtx& ctx) {
 }
 
 llvm::Value* DeclVarN::codegen(CodeGenCtx& ctx) {
-    return ctx.m_builder->getInt32(m_val);
+    m_val = ctx.m_builder->CreateAlloca(ctx.m_builder->getInt32Ty());
+    return m_val;
 }
 
 llvm::Value* BinOpN::codegen(CodeGenCtx& ctx) {
@@ -67,7 +68,8 @@ llvm::Value* BinOpN::codegen(CodeGenCtx& ctx) {
     case BinOp::LessOrEqual:
         return ctx.m_builder->CreateICmpSLE(lhsCodeGen, rhsCodeGen);
     case BinOp::Assign:
-        assert(0); // todo 
+        std::dynamic_pointer_cast<DeclVarN>(m_lhs)->set(rhsCodeGen);
+        break;
     default:
         assert(0);
     }

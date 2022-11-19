@@ -21,6 +21,7 @@ public:
 
     parser::token_type yylex(parser::semantic_type* yylval);
     bool parse();
+    void codegen();
     void dumpIR(std::ostream& out);
 
     friend parser;

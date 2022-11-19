@@ -27,6 +27,21 @@ parser::token_type Driver::yylex(parser::semantic_type* yylval) {
     return token;
 }
 
+void Driver::codegen() {
+    auto&& module = m_codegenCtx.m_module;
+    auto&& builder = m_codegenCtx.m_builder;
+    auto&& context = m_codegenCtx.m_context;
+
+    // __pcl_start
+    llvm::FunctionType *pclStartTy = llvm::FunctionType::get(builder->getInt32Ty(), false);
+    auto&& pclStart = llvm::Function::Create(pclStartTy, llvm::Function::ExternalLinkage, "start", *module);
+
+    llvm::BasicBlock *initBB = llvm::BasicBlock::Create(*context, "entry", pclStart);
+    builder->SetInsertPoint(initBB);
+
+    m_currentScope->codegen(m_codegenCtx);
+}
+
 void Driver::dumpIR(std::ostream& out) {
     std::string s;
     llvm::raw_string_ostream os(s);
