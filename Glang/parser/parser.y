@@ -83,14 +83,14 @@ stms:       stm                                 {
                                                 };
           | stms stm                            {
                                                     auto&& scope = driver->m_currentScope;
-                                                    scope->insertChild($1);
+                                                    scope->insertChild($2);
                                                 };
           | stms scope                          {
                                                     auto&& scope = driver->m_currentScope;
-                                                    scope->insertChild($1);
+                                                    scope->insertChild($2);
                                                 };
 
-stm:        assign                              { $$ = $1; };
+stm:        assign                              { std::cout << "hello"; $$ = $1; };
           | if                                  { $$ = $1; };
           | while                               { $$ = $1; };
           | output                              { $$ = $1; };
