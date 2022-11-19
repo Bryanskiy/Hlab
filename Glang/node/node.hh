@@ -93,9 +93,9 @@ private:
 class DeclVarN : public INode {
 public:
     llvm::Value* codegen(CodeGenCtx& ctx) override;
-    void set(llvm::Value* val) { m_val = val; }
+    void store(CodeGenCtx& ctx, llvm::Value* val);
 private:
-    llvm::Value* m_val = nullptr;;
+    llvm::Value* m_alloca = nullptr;
 };
 
 class ScopeN : public INode {

@@ -24,7 +24,7 @@ llvm::Value* ScopeN::codegen(CodeGenCtx& ctx) {
     for(auto&& child : m_childs) {
         child->codegen(ctx);
     }
-    nullptr;
+    return nullptr;
 }
 
 llvm::Value* I32N::codegen(CodeGenCtx& ctx) {
@@ -32,8 +32,15 @@ llvm::Value* I32N::codegen(CodeGenCtx& ctx) {
 }
 
 llvm::Value* DeclVarN::codegen(CodeGenCtx& ctx) {
-    m_val = ctx.m_builder->CreateAlloca(ctx.m_builder->getInt32Ty());
-    return m_val;
+    auto&& builder = ctx.m_builder;
+    if (!m_alloca) {
+        m_alloca = builder->CreateAlloca(builder->getInt32Ty());
+    }
+    return builder->CreateLoad(builder->getInt32Ty(), m_alloca);
+}
+
+void DeclVarN::store(CodeGenCtx& ctx, llvm::Value* val) {
+    ctx.m_builder->CreateStore(val, m_alloca);
 }
 
 llvm::Value* BinOpN::codegen(CodeGenCtx& ctx) {
@@ -68,12 +75,12 @@ llvm::Value* BinOpN::codegen(CodeGenCtx& ctx) {
     case BinOp::LessOrEqual:
         return ctx.m_builder->CreateICmpSLE(lhsCodeGen, rhsCodeGen);
     case BinOp::Assign:
-        std::dynamic_pointer_cast<DeclVarN>(m_lhs)->set(rhsCodeGen);
-        break;
-    default:
-        assert(0);
+        std::shared_ptr<DeclVarN> decl = std::dynamic_pointer_cast<DeclVarN>(m_lhs);
+        decl->store(ctx, rhsCodeGen);
+        return nullptr;
     }
 
+    assert(0);
     nullptr;
 }
 

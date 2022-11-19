@@ -90,7 +90,7 @@ stms:       stm                                 {
                                                     scope->insertChild($2);
                                                 };
 
-stm:        assign                              { std::cout << "hello"; $$ = $1; };
+stm:        assign                              { $$ = $1; };
           | if                                  { $$ = $1; };
           | while                               { $$ = $1; };
           | output                              { $$ = $1; };
