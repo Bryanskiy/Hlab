@@ -102,11 +102,14 @@ llvm::Value* BinOpN::codegen(CodeGenCtx& ctx) {
 llvm::Value* UnOpN::codegen(CodeGenCtx& ctx) {
     auto&& module = ctx.m_module;
     auto&& builder = ctx.m_builder;
-    llvm::Value* valCodegen = m_val->codegen(ctx);
+    llvm::Value* valCodegen;
+    if (m_val) {
+        valCodegen = m_val->codegen(ctx);
+    }
     switch (m_op) {
         case UnOp::Not:
             return ctx.m_builder->CreateNot(valCodegen);
-        case UnOp::Input:
+        case UnOp::Output:
         {
             auto* glangPrint = module->getFunction("__glang_print");
             assert(glangPrint && "Driver shall create decl for __glang_print");
@@ -114,7 +117,7 @@ llvm::Value* UnOpN::codegen(CodeGenCtx& ctx) {
             llvm::Value* args[] = { valCodegen };
             return builder->CreateCall(glangPrint, args);
         }
-        case UnOp::Output:
+        case UnOp::Input:
         {
             auto* glangScan = module->getFunction("__glang_scan");
             assert(glangScan && "Driver shall create decl for __glang_scan");

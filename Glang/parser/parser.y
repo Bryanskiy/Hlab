@@ -124,7 +124,7 @@ expr3:      LRB expr1 RRB                       { $$ = $2; };
                                                     $$ = node;
                                                 };
           | INTEGER                             { $$ = std::make_shared<glang::I32N>($1); };
-          | INPUT                               { assert(0); };
+          | INPUT                               { $$ = std::make_shared<glang::UnOpN>(glang::UnOp::Input, nullptr); };
 
 condition:  expr1 AND expr1                     { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::And, $3); };
           | expr1 OR expr1                      { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Or, $3); };      
@@ -141,7 +141,7 @@ if:        IF LRB condition RRB scope           {};
 
 while:     WHILE LRB condition RRB scope        {};
 
-output:    OUTPUT expr1 SCOLON                  {};
+output:    OUTPUT expr1 SCOLON                  { $$ = std::make_shared<glang::UnOpN>(glang::UnOp::Output, $2); };
                          
 %%
 

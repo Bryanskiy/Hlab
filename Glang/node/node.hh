@@ -83,7 +83,7 @@ private:
 
 class UnOpN : public INode {
 public:
-    UnOpN(std::shared_ptr<INode> val, UnOp op) : m_val{val}, m_op{op} {}
+    UnOpN(UnOp op, std::shared_ptr<INode> val) : m_val{val}, m_op{op} {}
     llvm::Value* codegen(CodeGenCtx& ctx) override;
 private:
     std::shared_ptr<INode> m_val;
