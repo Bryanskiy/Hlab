@@ -9,9 +9,24 @@
 #include <cstdint>
 #include <memory>
 
-#include "driver.hh"
+#include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/Module.h"
+#include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/GlobalValue.h"
+#include "llvm/IR/Constants.h"
+#include "llvm/IR/Verifier.h"
+#include "llvm/Support/TargetSelect.h"
+#include "llvm/Support/raw_ostream.h"
+#include "llvm/Support/raw_ostream.h"
 
 namespace glang {
+
+struct CodeGenCtx {
+    CodeGenCtx();
+    std::unique_ptr<llvm::LLVMContext> m_context = nullptr;
+    std::unique_ptr<llvm::Module> m_module = nullptr;
+    std::unique_ptr<llvm::IRBuilder<>> m_builder = nullptr;
+};
 
 enum class BinOp {
     /* arithm */
@@ -88,14 +103,17 @@ private:
 
 class ScopeN : public INode {
 public:
-    void insertChild(std::shared_ptr<ScopeN> child) { m_childs.push_back(child); }
+    ScopeN() = default;
+    ScopeN(std::shared_ptr<ScopeN> parent) : m_parent{parent} {}
+
+    void insertChild(std::shared_ptr<INode> child) { m_childs.push_back(child); }
     std::shared_ptr<ScopeN> getParent() const { return m_parent; }
     std::shared_ptr<DeclVarN> getDeclIfVisible(const std::string& name) const;
     void insertDecl(std::string& name, std::shared_ptr<DeclVarN> decl) { m_symTable[name] = decl; }
     llvm::Value* codegen(CodeGenCtx& ctx) override;
 private:
-    std::vector<std::shared_ptr<ScopeN>> m_childs;
-    std::shared_ptr<ScopeN> m_parent;
+    std::vector<std::shared_ptr<INode>> m_childs;
+    std::shared_ptr<ScopeN> m_parent = nullptr;
     std::unordered_map<std::string, std::shared_ptr<DeclVarN>> m_symTable;
 };
 

@@ -2,6 +2,12 @@
 
 namespace glang {
 
+CodeGenCtx::CodeGenCtx() {
+    m_context = std::make_unique<llvm::LLVMContext>();
+    m_module = std::make_unique<llvm::Module>("main", *m_context);
+    m_builder = std::make_unique<llvm::IRBuilder<>>(*m_context);
+}
+
 std::shared_ptr<DeclVarN> ScopeN::getDeclIfVisible(const std::string& name) const {
     std::shared_ptr<DeclVarN> ret = nullptr;
     auto&& it = m_symTable.find(name);

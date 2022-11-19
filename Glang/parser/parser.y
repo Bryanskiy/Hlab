@@ -62,27 +62,54 @@
 
 %%
 
-program:    stms                                {};
-
-scope:      open_sc stms close_sc               {};
-
-open_sc:    LCB                                 {};
-
-close_sc:   RCB                                 {
+program:    stms                                {
+                                                    auto&& ctx = driver->m_codegenCtx;
+                                                    driver->m_currentScope->codegen(ctx);
                                                 };
 
-stms:       stm                                 {};
-          | stms stm                            {};
-          | stms scope                          {};
+scope:      open_sc stms close_sc               {$$ = $3;};
 
-stm:        assign                              {};
-          | if                                  {};
-          | while                               {};
-          | output                              {};
+open_sc:    LCB                                 {
+                                                    auto&& scope = driver->m_currentScope;
+                                                    scope = std::make_shared<glang::ScopeN>(scope);
+                                                };
 
-assign:     lval ASSIGN expr1 SCOLON            {};
+close_sc:   RCB                                 {
+                                                    auto&& scope = driver->m_currentScope;
+                                                    $$ = scope;
+                                                    scope = scope->getParent();
+                                                };
+
+stms:       stm                                 {
+                                                    auto&& scope = driver->m_currentScope;
+                                                    scope->insertChild($1);
+                                                };
+          | stms stm                            {
+                                                    auto&& scope = driver->m_currentScope;
+                                                    scope->insertChild($1);
+                                                };
+          | stms scope                          {
+                                                    auto&& scope = driver->m_currentScope;
+                                                    scope->insertChild($1);
+                                                };
+
+stm:        assign                              {$$ = $1;};
+          | if                                  {$$ = $1;};
+          | while                               {$$ = $1;};
+          | output                              {$$ = $1;};
+
+assign:     lval ASSIGN expr1 SCOLON            {
+                                                    $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Assign, $3);
+                                                };
 
 lval:       IDENTIFIER                          {
+                                                    auto&& scope = driver->m_currentScope;
+                                                    auto&& node = scope->getDeclIfVisible($1);
+                                                    if(!node) {
+                                                        node = std::make_shared<glang::DeclVarN>();
+                                                        scope->insertDecl($1, node);
+                                                    }
+                                                    $$ = node;
                                                 };
 
 expr1:       expr2 PLUS expr2                   {};
@@ -125,7 +152,7 @@ namespace yy {
 		return driver->yylex(yylval);
 	}
 
-	void parser::error (const std::string& msg) {
-		std::cout << msg << " in line: " << std::endl;
+    void parser::error (const std::string& msg) {
+        std::cout << msg << " in line: " << std::endl;
 	}
 }

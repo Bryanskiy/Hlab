@@ -1,15 +1,5 @@
 #include "driver.hh"
 
-namespace glang {
-
-CodeGenCtx::CodeGenCtx() {
-    m_context = std::make_unique<llvm::LLVMContext>();
-    m_module = std::make_unique<llvm::Module>("main", *m_context);
-    m_builder = std::make_unique<llvm::IRBuilder<>>(*m_context);
-}
-
-} // namespace glang
-
 namespace yy {
     
 Driver::Driver(std::istream& in, std::ostream& out) {
