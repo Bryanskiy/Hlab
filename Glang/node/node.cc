@@ -6,6 +6,21 @@ CodeGenCtx::CodeGenCtx() {
     m_context = std::make_unique<llvm::LLVMContext>();
     m_module = std::make_unique<llvm::Module>("main", *m_context);
     m_builder = std::make_unique<llvm::IRBuilder<>>(*m_context);
+
+    // __glang_start
+    llvm::FunctionType* glangStartTy = llvm::FunctionType::get(m_builder->getVoidTy(), false);
+    auto* glangStart = llvm::Function::Create(glangStartTy, llvm::Function::ExternalLinkage, "__glang_start", *m_module);
+
+    llvm::BasicBlock *initBB = llvm::BasicBlock::Create(*m_context, "entry", glangStart);
+    m_builder->SetInsertPoint(initBB);
+
+    // __glang_print
+    llvm::FunctionType* glangPrintTy = llvm::FunctionType::get(m_builder->getVoidTy(), {m_builder->getInt32Ty()}, false);
+    auto* glangPrint = llvm::Function::Create(glangPrintTy, llvm::Function::ExternalLinkage, "__glang_print", *m_module);
+
+    // __glang_scan
+    llvm::FunctionType* glangScanTy = llvm::FunctionType::get(m_builder->getInt32Ty(), false);
+    auto* glangScan = llvm::Function::Create(glangScanTy, llvm::Function::ExternalLinkage, "__glang_scan", *m_module);
 }
 
 std::shared_ptr<DeclVarN> ScopeN::getDeclIfVisible(const std::string& name) const {
@@ -85,18 +100,29 @@ llvm::Value* BinOpN::codegen(CodeGenCtx& ctx) {
 }
 
 llvm::Value* UnOpN::codegen(CodeGenCtx& ctx) {
+    auto&& module = ctx.m_module;
+    auto&& builder = ctx.m_builder;
     llvm::Value* valCodegen = m_val->codegen(ctx);
     switch (m_op) {
         case UnOp::Not:
             return ctx.m_builder->CreateNot(valCodegen);
         case UnOp::Input:
-            assert(0); // todo
-        case UnOp::Output:
-            assert(0); // todo
-        default:
-            assert(0);
-    };
+        {
+            auto* glangPrint = module->getFunction("__glang_print");
+            assert(glangPrint && "Driver shall create decl for __glang_print");
 
+            llvm::Value* args[] = { valCodegen };
+            return builder->CreateCall(glangPrint, args);
+        }
+        case UnOp::Output:
+        {
+            auto* glangScan = module->getFunction("__glang_scan");
+            assert(glangScan && "Driver shall create decl for __glang_scan");
+
+            return builder->CreateCall(glangScan);
+        }
+    };
+    assert(0);
     nullptr;
 }
 

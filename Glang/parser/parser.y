@@ -124,7 +124,7 @@ expr3:      LRB expr1 RRB                       { $$ = $2; };
                                                     $$ = node;
                                                 };
           | INTEGER                             { $$ = std::make_shared<glang::I32N>($1); };
-          | INPUT                               { assert(0); };                  
+          | INPUT                               { assert(0); };
 
 condition:  expr1 AND expr1                     { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::And, $3); };
           | expr1 OR expr1                      { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Or, $3); };      
