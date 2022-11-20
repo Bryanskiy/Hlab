@@ -65,6 +65,8 @@
 %nterm<std::shared_ptr<glang::INode>>      condition
 %nterm<std::shared_ptr<glang::INode>>      output 
 %nterm<std::shared_ptr<glang::INode>>      stms
+%nterm<std::shared_ptr<glang::INode>>      return
+%nterm<std::shared_ptr<glang::INode>>      funcCall
 
 
 %%
@@ -101,7 +103,6 @@ funcSign:       IDENTIFIER LRB argList RRB LCB      {
                                                         $$ = std::make_shared<glang::FuncDeclN>($1, currentFunctionArgs);
                                                         currentFunctionArgs.clear();
                                                     };
-              | IDENTIFIER LRB RRB                  { $$ = std::make_shared<glang::FuncDeclN>($1); };
 
 argList:        argList COMMA IDENTIFIER            {
                                                         auto&& currentFunctionArgs = driver->m_currentFunctionArgs;
@@ -111,6 +112,7 @@ argList:        argList COMMA IDENTIFIER            {
                                                         auto&& currentFunctionArgs = driver->m_currentFunctionArgs;
                                                         currentFunctionArgs.push_back($1); 
                                                     };
+              | /* empty */                         {};
 
 scope:          openSc stms closeSc                 {$$ = $3;};
 
@@ -140,6 +142,7 @@ stm:            declVar                             { $$ = $1; };
               | if                                  { $$ = $1; };
               | while                               { $$ = $1; };
               | output                              { $$ = $1; };
+              | return                              { $$ = $1; };
 
 declVar:        lval ASSIGN expr1 SCOLON            { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Assign, $3); };
 
@@ -172,6 +175,18 @@ expr3:          LRB expr1 RRB                       { $$ = $2; };
                                                     };
               | INTEGER                             { $$ = std::make_shared<glang::I32N>($1); };
               | INPUT                               { $$ = std::make_shared<glang::UnOpN>(glang::UnOp::Input, nullptr); };
+              | funcCall                            { $$ = $1; };
+
+funcCall:       IDENTIFIER LRB argList RRB          { 
+                                                        auto&& scope = driver->m_currentScope;
+                                                        auto&& currentFunctionArgs = driver->m_currentFunctionArgs;
+                                                        auto&& node = scope->getDeclIfVisible($1);
+                                                        if (!node) {
+                                                            node = std::make_shared<glang::FuncDeclN>($1, currentFunctionArgs);
+                                                        }
+                                                        $$ = std::make_shared<glang::FuncCallN>(node, scope, currentFunctionArgs);
+                                                        currentFunctionArgs.clear();
+                                                    };
 
 condition:    expr1 AND expr1                       { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::And, $3); };
             | expr1 OR expr1                        { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Or, $3); };      
@@ -189,7 +204,9 @@ if:          IF LRB condition RRB scope             { $$ = std::make_shared<glan
 while:       WHILE LRB condition RRB scope          { $$ = std::make_shared<glang::WhileN>($5, $3); };
 
 output:      OUTPUT expr1 SCOLON                    { $$ = std::make_shared<glang::UnOpN>(glang::UnOp::Output, $2); };
-                         
+
+return:      RETURN expr1 SCOLON                    { $$ = std::make_shared<glang::RetN>($2); };
+
 %%
 
 namespace yy {

@@ -148,6 +148,7 @@ public:
 private:
     std::vector<std::string> m_argNames;
     std::string m_name;
+    llvm::Function* m_func = nullptr;
 };
 
 class FuncN : public INode {
@@ -157,6 +158,27 @@ public:
 private:
     std::shared_ptr<ScopeN> m_scope;
     std::shared_ptr<FuncDeclN> m_header;
+};
+
+class RetN : public INode {
+public:
+    RetN(std::shared_ptr<INode> val) : m_val{val} {}
+    llvm::Value* codegen(CodeGenCtx& ctx) override;
+private:
+    std::shared_ptr<INode> m_val;
+};
+
+class FuncCallN : public INode {
+public:
+    FuncCallN(std::shared_ptr<INode> funcDecl, std::shared_ptr<ScopeN> currScope, const std::vector<std::string>& argNames = {}) :
+        m_currScope{currScope},
+        m_argNames{argNames},
+        m_funcDecl{funcDecl} {}
+    llvm::Value* codegen(CodeGenCtx& ctx) override;
+private:
+    std::shared_ptr<ScopeN> m_currScope;
+    std::vector<std::string> m_argNames;
+    std::shared_ptr<INode> m_funcDecl;
 };
 
 } // namespace glang

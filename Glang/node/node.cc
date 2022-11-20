@@ -169,18 +169,20 @@ llvm::Value* WhileN::codegen(CodeGenCtx& ctx) {
 }
 
 llvm::Value* FuncDeclN::codegen(CodeGenCtx& ctx) {
-    auto&& module = ctx.m_module;
-    auto&& builder = ctx.m_builder;
-    auto&& context = ctx.m_context;
+    if (!m_func) {
+        auto&& module = ctx.m_module;
+        auto&& builder = ctx.m_builder;
+        auto&& context = ctx.m_context;
 
-    std::vector<llvm::Type*> argTypes;
-    for (std::size_t i = 0; i < m_argNames.size(); ++i) {
-        argTypes.push_back(builder->getInt32Ty());
+        std::vector<llvm::Type*> argTypes;
+        for (std::size_t i = 0; i < m_argNames.size(); ++i) {
+            argTypes.push_back(builder->getInt32Ty());
+        }
+
+        llvm::FunctionType* functTy = llvm::FunctionType::get(builder->getInt32Ty(), argTypes, false);
+        m_func = llvm::Function::Create(functTy, llvm::Function::ExternalLinkage, m_name, *module);
     }
-
-    llvm::FunctionType* functTy = llvm::FunctionType::get(builder->getInt32Ty(), argTypes, false);
-    auto* func = llvm::Function::Create(functTy, llvm::Function::ExternalLinkage, m_name, *module);
-    return func;
+    return m_func;
 }
 
 llvm::Value* FuncN::codegen(CodeGenCtx& ctx) {
@@ -211,6 +213,32 @@ llvm::Value* FuncN::codegen(CodeGenCtx& ctx) {
 
     m_scope->codegen(ctx);
     return nullptr;
+}
+
+llvm::Value* RetN::codegen(CodeGenCtx& ctx) {
+    auto* valCodegen = m_val->codegen(ctx);
+    ctx.m_builder->CreateRet(valCodegen);
+}
+
+llvm::Value* FuncCallN::codegen(CodeGenCtx& ctx) {
+    auto&& module = ctx.m_module;
+    auto&& builder = ctx.m_builder;
+    auto&& context = ctx.m_context;
+
+    auto* funcDecl = llvm::dyn_cast<llvm::Function>(m_funcDecl->codegen(ctx));
+    auto* funcTy = funcDecl->getFunctionType();
+
+    auto&& symTable = m_currScope->getSymTab();
+
+    std::vector<llvm::Value*> args;
+    for (auto&& name : m_argNames) {
+        auto&& it = symTable.find(name);
+        assert(it != symTable.end());
+        args.push_back(it->second->codegen(ctx));
+    }
+
+    auto* ret = builder->CreateCall(funcTy, funcDecl, args);
+    return ret;
 }
 
 } // namespace glang

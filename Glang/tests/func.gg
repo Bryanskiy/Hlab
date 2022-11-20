@@ -1,3 +1,11 @@
 fn foo(a, b) {
-    print a + b;
+    return a + b;
+}
+
+fn main() {
+    a = 2;
+    b = 3;
+    c = foo(a, b);
+    print c;
+    return 0;
 }
