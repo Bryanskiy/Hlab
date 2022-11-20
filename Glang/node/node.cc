@@ -7,13 +7,6 @@ CodeGenCtx::CodeGenCtx() {
     m_module = std::make_unique<llvm::Module>("main", *m_context);
     m_builder = std::make_unique<llvm::IRBuilder<>>(*m_context);
 
-    // __glang_start
-    llvm::FunctionType* glangStartTy = llvm::FunctionType::get(m_builder->getVoidTy(), false);
-    auto* glangStart = llvm::Function::Create(glangStartTy, llvm::Function::ExternalLinkage, "__glang_start", *m_module);
-
-    llvm::BasicBlock *initBB = llvm::BasicBlock::Create(*m_context, "entry", glangStart);
-    m_builder->SetInsertPoint(initBB);
-
     // __glang_print
     llvm::FunctionType* glangPrintTy = llvm::FunctionType::get(m_builder->getVoidTy(), {m_builder->getInt32Ty()}, false);
     auto* glangPrint = llvm::Function::Create(glangPrintTy, llvm::Function::ExternalLinkage, "__glang_print", *m_module);
