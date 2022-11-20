@@ -29,6 +29,7 @@ private:
     std::unique_ptr<yyFlexLexer> m_lexer = nullptr;
     glang::CodeGenCtx m_codegenCtx;
     std::shared_ptr<glang::ScopeN> m_currentScope = std::make_shared<glang::ScopeN>();
+    std::vector<std::string> m_currentFunctionArgs;
 };
 
 } // namespace yy

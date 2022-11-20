@@ -9,14 +9,17 @@ INTEGER [0]|[1-9][0-9]*
 NAME [a-zA-Z][a-zA-Z0-9]*
 
 %%
+"return"    return yy::parser::token_type::RETURN;
 "while"     return yy::parser::token_type::WHILE;
 "if"        return yy::parser::token_type::IF;
+"fn"        return yy::parser::token_type::FN;
 
 ";"         return yy::parser::token_type::SCOLON;
 "{"         return yy::parser::token_type::LCB;
 "}"         return yy::parser::token_type::RCB;
 "("         return yy::parser::token_type::LRB;
 ")"         return yy::parser::token_type::RRB;
+","         return yy::parser::token_type::COMMA;
 
 "print"     return yy::parser::token_type::OUTPUT;
 

@@ -23,8 +23,8 @@ CodeGenCtx::CodeGenCtx() {
     auto* glangScan = llvm::Function::Create(glangScanTy, llvm::Function::ExternalLinkage, "__glang_scan", *m_module);
 }
 
-std::shared_ptr<DeclVarN> ScopeN::getDeclIfVisible(const std::string& name) const {
-    std::shared_ptr<DeclVarN> ret = nullptr;
+std::shared_ptr<DeclN> ScopeN::getDeclIfVisible(const std::string& name) const {
+    std::shared_ptr<DeclN> ret = nullptr;
     auto&& it = m_symTable.find(name);
     if(it != m_symTable.end()) {
         return it->second;
@@ -172,6 +172,38 @@ llvm::Value* WhileN::codegen(CodeGenCtx& ctx) {
     builder->CreateBr(conditionBB);
 
     builder->SetInsertPoint(notTakenBB);
+    return nullptr;
+}
+
+llvm::Value* FuncDeclN::codegen(CodeGenCtx& ctx) {
+    auto&& module = ctx.m_module;
+    auto&& builder = ctx.m_builder;
+    auto&& context = ctx.m_context;
+
+    std::vector<llvm::Type*> argTypes;
+    for (std::size_t i = 0; i < m_argNames.size(); ++i) {
+        argTypes.push_back(builder->getInt32Ty());
+    }
+
+    llvm::FunctionType* functTy = llvm::FunctionType::get(builder->getInt32Ty(), argTypes, false);
+    auto* func = llvm::Function::Create(functTy, llvm::Function::ExternalLinkage, m_name, *module);
+    return func;
+}
+
+llvm::Value* FuncN::codegen(CodeGenCtx& ctx) {
+    auto&& module = ctx.m_module;
+    auto&& builder = ctx.m_builder;
+    auto&& context = ctx.m_context;
+
+    m_header->codegen(ctx); // create func declaration
+
+    auto&& funcName = m_header->getName();
+    auto* func = module->getFunction(funcName);
+
+    llvm::BasicBlock *initBB = llvm::BasicBlock::Create(*context, "entry", func);
+    builder->SetInsertPoint(initBB);
+
+    m_scope->codegen(ctx);
     return nullptr;
 }
 

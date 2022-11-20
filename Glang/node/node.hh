@@ -90,7 +90,11 @@ private:
     UnOp m_op;
 };
 
-class DeclVarN : public INode {
+struct DeclN : public INode {
+    virtual llvm::Value* codegen(CodeGenCtx& ctx) override = 0;
+};
+
+class DeclVarN : public DeclN {
 public:
     llvm::Value* codegen(CodeGenCtx& ctx) override;
     void store(CodeGenCtx& ctx, llvm::Value* val);
@@ -105,13 +109,13 @@ public:
 
     void insertChild(std::shared_ptr<INode> child) { m_childs.push_back(child); }
     std::shared_ptr<ScopeN> getParent() const { return m_parent; }
-    std::shared_ptr<DeclVarN> getDeclIfVisible(const std::string& name) const;
-    void insertDecl(std::string& name, std::shared_ptr<DeclVarN> decl) { m_symTable[name] = decl; }
+    std::shared_ptr<DeclN> getDeclIfVisible(const std::string& name) const;
+    void insertDecl(const std::string& name, std::shared_ptr<DeclN> decl) { m_symTable[name] = decl; }
     llvm::Value* codegen(CodeGenCtx& ctx) override;
 private:
     std::vector<std::shared_ptr<INode>> m_childs;
     std::shared_ptr<ScopeN> m_parent = nullptr;
-    std::unordered_map<std::string, std::shared_ptr<DeclVarN>> m_symTable;
+    std::unordered_map<std::string, std::shared_ptr<DeclN>> m_symTable;
 };
 
 class IfN : public INode {
@@ -130,6 +134,26 @@ public:
 private:
     std::shared_ptr<ScopeN> m_block;
     std::shared_ptr<INode> m_condition;
+};
+
+class FuncDeclN : public DeclN {
+public:
+    FuncDeclN(const std::string& name, const std::vector<std::string>& argNames = {}) : m_argNames{argNames}, m_name{name} {}
+    llvm::Value* codegen(CodeGenCtx& ctx) override;
+    const std::vector<std::string>& getArgNames() const { return m_argNames; }
+    const std::string& getName() const { return m_name; }
+private:
+    std::vector<std::string> m_argNames;
+    std::string m_name;
+};
+
+class FuncN : public INode {
+public:
+    FuncN(std::shared_ptr<ScopeN> scope, std::shared_ptr<FuncDeclN> header) : m_scope{scope}, m_header{header} {}
+    llvm::Value* codegen(CodeGenCtx& ctx) override;
+private:
+    std::shared_ptr<ScopeN> m_scope;
+    std::shared_ptr<FuncDeclN> m_header;
 };
 
 } // namespace glang
