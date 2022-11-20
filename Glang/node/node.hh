@@ -112,10 +112,13 @@ public:
     std::shared_ptr<DeclN> getDeclIfVisible(const std::string& name) const;
     void insertDecl(const std::string& name, std::shared_ptr<DeclN> decl) { m_symTable[name] = decl; }
     llvm::Value* codegen(CodeGenCtx& ctx) override;
+
+    using SymTab = std::unordered_map<std::string, std::shared_ptr<DeclN>>;
+    const SymTab& getSymTab() const { return m_symTable; } 
 private:
     std::vector<std::shared_ptr<INode>> m_childs;
     std::shared_ptr<ScopeN> m_parent = nullptr;
-    std::unordered_map<std::string, std::shared_ptr<DeclN>> m_symTable;
+    SymTab m_symTable;
 };
 
 class IfN : public INode {

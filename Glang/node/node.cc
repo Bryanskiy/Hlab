@@ -196,6 +196,19 @@ llvm::Value* FuncN::codegen(CodeGenCtx& ctx) {
     llvm::BasicBlock *initBB = llvm::BasicBlock::Create(*context, "entry", func);
     builder->SetInsertPoint(initBB);
 
+    auto&& argNames = m_header->getArgNames();
+    auto&& symTable = m_scope->getSymTab();
+
+    for(std::size_t i = 0; i < argNames.size(); ++i) {
+        auto&& it = symTable.find(argNames[i]);
+        if(it != symTable.end()) {
+            auto&& decl = std::dynamic_pointer_cast<DeclVarN>(it->second);
+            decl->codegen(ctx);
+            auto&& argVal = func->getArg(0);
+            decl->store(ctx, argVal);
+        }
+    }
+
     m_scope->codegen(ctx);
     return nullptr;
 }

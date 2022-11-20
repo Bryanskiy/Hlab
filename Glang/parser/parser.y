@@ -81,14 +81,17 @@ globalScope:    declVar globalScope                 {
                                                     };
               | /* empty */                         {};
 
-func:           FN funcSign scope                   {
-                                                        $$ = std::make_shared<glang::FuncN>($3, $2);
-                                                    };
-funcSign:       IDENTIFIER LRB argList RRB          {
+func:           FN funcSign stms closeSc            {
                                                         auto&& scope = driver->m_currentScope;
+                                                        $$ = std::make_shared<glang::FuncN>($4, $2);
+                                                        auto&& fnName = $2->getName();
+                                                        assert(scope->getDeclIfVisible(fnName) == nullptr && "decl with same name exists");
+                                                        scope->insertDecl(fnName, $2);
+                                                    };
+funcSign:       IDENTIFIER LRB argList RRB LCB      {
+                                                        auto&& scope = driver->m_currentScope;
+                                                        scope = std::make_shared<glang::ScopeN>(scope);
                                                         auto&& currentFunctionArgs = driver->m_currentFunctionArgs;
-
-                                                        assert(scope->getDeclIfVisible($1) == nullptr && "decl with same name exists");
 
                                                         for(const std::string& name : currentFunctionArgs) {
                                                             auto&& node = std::make_shared<glang::DeclVarN>();
@@ -96,15 +99,9 @@ funcSign:       IDENTIFIER LRB argList RRB          {
                                                         }
 
                                                         $$ = std::make_shared<glang::FuncDeclN>($1, currentFunctionArgs);
-                                                        scope->insertDecl($1, $$);
                                                         currentFunctionArgs.clear();
                                                     };
-              | IDENTIFIER LRB RRB                  {
-                                                        auto&& scope = driver->m_currentScope;
-                                                        assert(scope->getDeclIfVisible($1) == nullptr && "decl with same name exists");
-                                                        $$ = std::make_shared<glang::FuncDeclN>($1); 
-                                                        scope->insertDecl($1, $$);
-                                                    };
+              | IDENTIFIER LRB RRB                  { $$ = std::make_shared<glang::FuncDeclN>($1); };
 
 argList:        argList COMMA IDENTIFIER            {
                                                         auto&& currentFunctionArgs = driver->m_currentFunctionArgs;
