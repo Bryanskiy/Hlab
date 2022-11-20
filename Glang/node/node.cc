@@ -204,7 +204,7 @@ llvm::Value* FuncN::codegen(CodeGenCtx& ctx) {
         if(it != symTable.end()) {
             auto&& decl = std::dynamic_pointer_cast<DeclVarN>(it->second);
             decl->codegen(ctx);
-            auto&& argVal = func->getArg(0);
+            auto&& argVal = func->getArg(i);
             decl->store(ctx, argVal);
         }
     }
