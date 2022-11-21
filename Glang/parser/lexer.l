@@ -19,6 +19,8 @@ NAME [a-zA-Z][a-zA-Z0-9]*
 "}"         return yy::parser::token_type::RCB;
 "("         return yy::parser::token_type::LRB;
 ")"         return yy::parser::token_type::RRB;
+"["         return yy::parser::token_type::LAB;
+"]"         return yy::parser::token_type::RAB;
 ","         return yy::parser::token_type::COMMA;
 
 "print"     return yy::parser::token_type::OUTPUT;

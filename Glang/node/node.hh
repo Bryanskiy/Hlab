@@ -127,6 +127,17 @@ private:
     SymTab m_symTable;
 };
 
+class DeclGlobalArrN : public DeclN {
+public:
+    DeclGlobalArrN(std::int32_t size) : m_size{size} {}
+    void setName(const std::string& name) { m_name = name; }
+    llvm::Value* codegen(CodeGenCtx& ctx) override;
+private:
+    std::int32_t m_size;
+    llvm::Constant* m_array;
+    std::string m_name;
+};
+
 class IfN : public INode {
 public:
     IfN(std::shared_ptr<ScopeN> block, std::shared_ptr<INode> condition, std::shared_ptr<ScopeN> currentScope) : 

@@ -219,7 +219,8 @@ llvm::Value* FuncN::codegen(CodeGenCtx& ctx) {
 
 llvm::Value* RetN::codegen(CodeGenCtx& ctx) {
     auto* valCodegen = m_val->codegen(ctx);
-    ctx.m_builder->CreateRet(valCodegen);
+    auto* ret = ctx.m_builder->CreateRet(valCodegen);
+    return ret;
 }
 
 llvm::Value* FuncCallN::codegen(CodeGenCtx& ctx) {
@@ -241,6 +242,16 @@ llvm::Value* FuncCallN::codegen(CodeGenCtx& ctx) {
 
     auto* ret = builder->CreateCall(funcTy, funcDecl, args);
     return ret;
+}
+
+llvm::Value* DeclGlobalArrN::codegen(CodeGenCtx& ctx) {
+    auto&& module = ctx.m_module;
+    auto&& builder = ctx.m_builder;
+    auto&& context = ctx.m_context;
+
+    auto* arrType = llvm::ArrayType::get(builder->getInt32Ty(), m_size);
+    m_array = module->getOrInsertGlobal(m_name, arrType);
+    return m_array;
 }
 
 } // namespace glang

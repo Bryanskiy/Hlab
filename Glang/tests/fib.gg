@@ -1,3 +1,5 @@
+fibs[10];
+
 fn fib(n) {
 
     first = 1;

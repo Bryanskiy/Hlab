@@ -29,6 +29,8 @@
        RCB               "}"
        LRB               "("
        RRB               ")"
+       LAB               "["
+       RAB               "]"
        COMMA             ","
        OUTPUT            "print"
        ASSIGN            "="
@@ -67,15 +69,15 @@
 %nterm<std::shared_ptr<glang::INode>>      stms
 %nterm<std::shared_ptr<glang::INode>>      return
 %nterm<std::shared_ptr<glang::INode>>      funcCall
-
+%nterm<std::shared_ptr<glang::INode>>      globalArrDecl
 
 %%
 
 program:        globalScope                         { driver->codegen(); };
 
-globalScope:    declVar globalScope                 {                                                         
+globalScope:    globalArrDecl globalScope           {
                                                         auto&& scope = driver->m_currentScope;
-                                                        scope->insertChild($1); 
+                                                        scope->insertChild($1);
                                                     };
               | func globalScope                    { 
                                                         auto&& scope = driver->m_currentScope;
@@ -83,11 +85,19 @@ globalScope:    declVar globalScope                 {
                                                     };
               | /* empty */                         {};
 
+globalArrDecl:  IDENTIFIER LAB INTEGER RAB SCOLON   {
+                                                        auto&& scope = driver->m_currentScope;
+                                                        auto&& node = std::make_shared<glang::DeclGlobalArrN>($3);
+                                                        node->setName($1);
+                                                        $$ = node;
+                                                        scope->insertDecl($1, node);
+                                                    };
+
 func:           FN funcSign stms closeSc            {
                                                         auto&& scope = driver->m_currentScope;
                                                         $$ = std::make_shared<glang::FuncN>($4, $2);
                                                         auto&& fnName = $2->getName();
-                                                        assert(scope->getDeclIfVisible(fnName) == nullptr && "decl with same name exists");
+                                                        assert(scope->getDeclIfVisible(fnName) == nullptr && "decl with same name exists"); // TODO: fix
                                                         scope->insertDecl(fnName, $2);
                                                     };
 funcSign:       IDENTIFIER LRB argList RRB LCB      {
@@ -144,6 +154,7 @@ stm:            declVar                             { $$ = $1; };
               | while                               { $$ = $1; };
               | output                              { $$ = $1; };
               | return                              { $$ = $1; };
+              | funcCall                            { $$ = $1; };
 
 declVar:        lval ASSIGN expr1 SCOLON            { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Assign, $3); };
 
