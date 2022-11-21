@@ -83,8 +83,13 @@ llvm::Value* BinOpN::codegen(CodeGenCtx& ctx) {
     case BinOp::LessOrEqual:
         return ctx.m_builder->CreateICmpSLE(lhsCodeGen, rhsCodeGen);
     case BinOp::Assign:
-        std::shared_ptr<DeclVarN> decl = std::dynamic_pointer_cast<DeclVarN>(m_lhs);
-        decl->store(ctx, rhsCodeGen);
+
+        if (std::shared_ptr<DeclVarN> decl = std::dynamic_pointer_cast<DeclVarN>(m_lhs)) {
+            decl->store(ctx, rhsCodeGen);
+        } 
+        else if (std::shared_ptr<ArrAccessN> decl = std::dynamic_pointer_cast<ArrAccessN>(m_lhs)) {
+            ctx.m_builder->CreateStore(rhsCodeGen, lhsCodeGen);
+        }
         return nullptr;
     }
 
@@ -249,9 +254,22 @@ llvm::Value* DeclGlobalArrN::codegen(CodeGenCtx& ctx) {
     auto&& builder = ctx.m_builder;
     auto&& context = ctx.m_context;
 
-    auto* arrType = llvm::ArrayType::get(builder->getInt32Ty(), m_size);
-    m_array = module->getOrInsertGlobal(m_name, arrType);
+    m_arrayType = llvm::ArrayType::get(builder->getInt32Ty(), m_size);
+    m_array = module->getOrInsertGlobal(m_name, m_arrayType);
     return m_array;
+}
+
+llvm::Value* ArrAccessN::codegen(CodeGenCtx& ctx) {
+    auto&& module = ctx.m_module;
+    auto&& builder = ctx.m_builder;
+    auto&& context = ctx.m_context;
+
+    std::shared_ptr<DeclGlobalArrN> decl = std::dynamic_pointer_cast<DeclGlobalArrN>(m_arrDecl);
+    auto* arr = decl->getArr();
+    auto* arrTy = decl->getArrayType();
+
+    auto* idx = m_access->codegen(ctx);
+    return builder->CreateGEP(arrTy, arr, { builder->getInt32(0), idx, });
 }
 
 } // namespace glang

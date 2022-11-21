@@ -75,13 +75,13 @@
 
 program:        globalScope                         { driver->codegen(); };
 
-globalScope:    globalArrDecl globalScope           {
+globalScope:    globalScope globalArrDecl           {
                                                         auto&& scope = driver->m_currentScope;
-                                                        scope->insertChild($1);
+                                                        scope->insertChild($2);
                                                     };
-              | func globalScope                    { 
+              | globalScope func                    { 
                                                         auto&& scope = driver->m_currentScope;
-                                                        scope->insertChild($1);
+                                                        scope->insertChild($2);
                                                     };
               | /* empty */                         {};
 
@@ -166,6 +166,12 @@ lval:           IDENTIFIER                          {
                                                             scope->insertDecl($1, node);
                                                         }
                                                         $$ = node;
+                                                    };
+              | IDENTIFIER LAB expr1 RAB            {
+                                                        auto&& scope = driver->m_currentScope;
+                                                        auto&& node = scope->getDeclIfVisible($1);
+                                                        assert(node != nullptr && "undeclared");
+                                                        $$ = std::make_shared<glang::ArrAccessN>($3, node);
                                                     };
 
 expr1:          expr2 PLUS expr2                    { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Plus, $3); };

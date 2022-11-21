@@ -5,6 +5,10 @@ fn fib(n) {
     first = 1;
     second = 1;
     iter = 2;
+
+    fibs[0] = first;
+    fibs[1] = second;
+
     while ( iter < n ) {
         tmp = second;
         second = second + first;

@@ -132,10 +132,24 @@ public:
     DeclGlobalArrN(std::int32_t size) : m_size{size} {}
     void setName(const std::string& name) { m_name = name; }
     llvm::Value* codegen(CodeGenCtx& ctx) override;
+
+    llvm::Constant* getArr() const { return m_array; }
+    llvm::Type* getArrayType() const { return m_arrayType; }
 private:
     std::int32_t m_size;
-    llvm::Constant* m_array;
+    llvm::Constant* m_array = nullptr;
+    llvm::Type* m_arrayType = nullptr;
     std::string m_name;
+};
+
+class ArrAccessN : public INode {
+public:
+    ArrAccessN(std::shared_ptr<INode> access, std::shared_ptr<INode> arrDecl) :
+        m_access{access}, m_arrDecl{arrDecl} {}
+
+    llvm::Value* codegen(CodeGenCtx& ctx) override;
+private:
+    std::shared_ptr<INode> m_access, m_arrDecl;
 };
 
 class IfN : public INode {
