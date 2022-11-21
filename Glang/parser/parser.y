@@ -70,6 +70,7 @@
 %nterm<std::shared_ptr<glang::INode>>      return
 %nterm<std::shared_ptr<glang::INode>>      funcCall
 %nterm<std::shared_ptr<glang::INode>>      globalArrDecl
+%nterm<std::shared_ptr<glang::INode>>      arrAccess
 
 %%
 
@@ -167,7 +168,9 @@ lval:           IDENTIFIER                          {
                                                         }
                                                         $$ = node;
                                                     };
-              | IDENTIFIER LAB expr1 RAB            {
+              | arrAccess                           { $$ = $1; };
+
+arrAccess:      IDENTIFIER LAB expr1 RAB            {
                                                         auto&& scope = driver->m_currentScope;
                                                         auto&& node = scope->getDeclIfVisible($1);
                                                         assert(node != nullptr && "undeclared");
@@ -194,6 +197,7 @@ expr3:          LRB expr1 RRB                       { $$ = $2; };
               | INTEGER                             { $$ = std::make_shared<glang::I32N>($1); };
               | INPUT                               { $$ = std::make_shared<glang::UnOpN>(glang::UnOp::Input, nullptr); };
               | funcCall                            { $$ = $1; };
+              | arrAccess                           { $$ = $1; }
 
 funcCall:       IDENTIFIER LRB argList RRB          { 
                                                         auto&& scope = driver->m_currentScope;

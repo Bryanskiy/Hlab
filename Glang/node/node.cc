@@ -51,6 +51,10 @@ void DeclVarN::store(CodeGenCtx& ctx, llvm::Value* val) {
     ctx.m_builder->CreateStore(val, m_alloca);
 }
 
+void ArrAccessN::store(CodeGenCtx& ctx, llvm::Value* val) {
+    ctx.m_builder->CreateStore(val, m_ptr);
+}
+
 llvm::Value* BinOpN::codegen(CodeGenCtx& ctx) {
     llvm::Value* lhsCodeGen = m_lhs->codegen(ctx);
     llvm::Value* rhsCodeGen = m_rhs->codegen(ctx);
@@ -88,7 +92,7 @@ llvm::Value* BinOpN::codegen(CodeGenCtx& ctx) {
             decl->store(ctx, rhsCodeGen);
         } 
         else if (std::shared_ptr<ArrAccessN> decl = std::dynamic_pointer_cast<ArrAccessN>(m_lhs)) {
-            ctx.m_builder->CreateStore(rhsCodeGen, lhsCodeGen);
+            decl->store(ctx, rhsCodeGen);
         }
         return nullptr;
     }
@@ -269,7 +273,8 @@ llvm::Value* ArrAccessN::codegen(CodeGenCtx& ctx) {
     auto* arrTy = decl->getArrayType();
 
     auto* idx = m_access->codegen(ctx);
-    return builder->CreateGEP(arrTy, arr, { builder->getInt32(0), idx, });
+    m_ptr = builder->CreateGEP(arrTy, arr, { builder->getInt32(0), idx, });
+    return builder->CreateLoad(builder->getInt32Ty(), m_ptr);
 }
 
 } // namespace glang

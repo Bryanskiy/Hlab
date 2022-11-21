@@ -13,15 +13,23 @@ fn fib(n) {
         tmp = second;
         second = second + first;
         first = tmp;
+        fibs[iter] = second;
         iter = iter + 1;
     }
 
-    return second;
+    return 0;
 }
 
 fn main() {
-    n = ?;
+    n = 10;
     ans = fib(n);
-    print ans;
+    
+    iter = 0;
+
+    while (iter < n) {
+        print fibs[iter];
+        iter = iter + 1;
+    }
+
     return 0;
 }

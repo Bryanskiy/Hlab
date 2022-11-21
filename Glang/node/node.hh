@@ -148,8 +148,10 @@ public:
         m_access{access}, m_arrDecl{arrDecl} {}
 
     llvm::Value* codegen(CodeGenCtx& ctx) override;
+    void store(CodeGenCtx& ctx, llvm::Value* val);
 private:
     std::shared_ptr<INode> m_access, m_arrDecl;
+    llvm::Value* m_ptr = nullptr;
 };
 
 class IfN : public INode {
