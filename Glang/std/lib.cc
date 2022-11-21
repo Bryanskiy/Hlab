@@ -15,5 +15,3 @@ extern "C" int __glang_scan() {
 }
 
 }
-
-int main() { __glang_start(); }

@@ -1,10 +1,21 @@
-first = 1;
-second = 1;
-iter = 2;
-while ( iter < 45 ) {
-    tmp = second;
-    second = second + first;
-    first = tmp;
-    iter = iter + 1;
-    print second;
+fn fib(n) {
+
+    first = 1;
+    second = 1;
+    iter = 2;
+    while ( iter < n ) {
+        tmp = second;
+        second = second + first;
+        first = tmp;
+        iter = iter + 1;
+    }
+
+    return second;
+}
+
+fn main() {
+    n = ?;
+    ans = fib(n);
+    print ans;
+    return 0;
 }

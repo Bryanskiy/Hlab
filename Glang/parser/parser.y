@@ -101,6 +101,7 @@ funcSign:       IDENTIFIER LRB argList RRB LCB      {
                                                         }
 
                                                         $$ = std::make_shared<glang::FuncDeclN>($1, currentFunctionArgs);
+                                                        scope->setParentFunc($$);
                                                         currentFunctionArgs.clear();
                                                     };
 
@@ -199,9 +200,15 @@ condition:    expr1 AND expr1                       { $$ = std::make_shared<glan
             | expr1 LESS_OR_EQUAL expr1             { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::LessOrEqual, $3); };
             | expr1                                 { $$ = $1; };
 
-if:          IF LRB condition RRB scope             { $$ = std::make_shared<glang::IfN>($5, $3); };
+if:          IF LRB condition RRB scope             {
+                                                        auto&& scope = driver->m_currentScope;
+                                                        $$ = std::make_shared<glang::IfN>($5, $3, scope);
+                                                    };
 
-while:       WHILE LRB condition RRB scope          { $$ = std::make_shared<glang::WhileN>($5, $3); };
+while:       WHILE LRB condition RRB scope          {
+                                                        auto&& scope = driver->m_currentScope;
+                                                        $$ = std::make_shared<glang::WhileN>($5, $3, scope);
+                                                    };
 
 output:      OUTPUT expr1 SCOLON                    { $$ = std::make_shared<glang::UnOpN>(glang::UnOp::Output, $2); };
 

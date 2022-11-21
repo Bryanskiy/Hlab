@@ -102,6 +102,8 @@ private:
     llvm::Value* m_alloca = nullptr;
 };
 
+class FuncDeclN;
+
 class ScopeN : public INode {
 public:
     ScopeN() = default;
@@ -113,30 +115,42 @@ public:
     void insertDecl(const std::string& name, std::shared_ptr<DeclN> decl) { m_symTable[name] = decl; }
     llvm::Value* codegen(CodeGenCtx& ctx) override;
 
+    void setParentFunc(std::shared_ptr<FuncDeclN> parentFunc) { m_parentFunc = parentFunc; }
+    std::shared_ptr<FuncDeclN> getParentFunc() const { return m_parentFunc; }
+
     using SymTab = std::unordered_map<std::string, std::shared_ptr<DeclN>>;
     const SymTab& getSymTab() const { return m_symTable; } 
 private:
     std::vector<std::shared_ptr<INode>> m_childs;
     std::shared_ptr<ScopeN> m_parent = nullptr;
+    std::shared_ptr<FuncDeclN> m_parentFunc = nullptr;
     SymTab m_symTable;
 };
 
 class IfN : public INode {
 public:
-    IfN(std::shared_ptr<ScopeN> block, std::shared_ptr<INode> condition) : m_block{block}, m_condition{condition} {}
+    IfN(std::shared_ptr<ScopeN> block, std::shared_ptr<INode> condition, std::shared_ptr<ScopeN> currentScope) : 
+        m_block{block},
+        m_condition{condition},
+        m_currentScope{currentScope} {}
     llvm::Value* codegen(CodeGenCtx& ctx) override;
 private:
     std::shared_ptr<ScopeN> m_block;
     std::shared_ptr<INode> m_condition;
+    std::shared_ptr<ScopeN> m_currentScope;
 };
 
 class WhileN : public INode {
 public:
-    WhileN(std::shared_ptr<ScopeN> block, std::shared_ptr<INode> condition) : m_block{block}, m_condition{condition} {}
+    WhileN(std::shared_ptr<ScopeN> block, std::shared_ptr<INode> condition, std::shared_ptr<ScopeN> currentScope) : 
+        m_block{block}, 
+        m_condition{condition},
+        m_currentScope{currentScope} {}
     llvm::Value* codegen(CodeGenCtx& ctx) override;
 private:
     std::shared_ptr<ScopeN> m_block;
     std::shared_ptr<INode> m_condition;
+    std::shared_ptr<ScopeN> m_currentScope;
 };
 
 class FuncDeclN : public DeclN {

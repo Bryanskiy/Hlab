@@ -6,7 +6,6 @@ extern "C" {
 
 void __glang_print(int n);
 int __glang_scan();
-void __glang_start();
 
 #ifdef __cplusplus
 }

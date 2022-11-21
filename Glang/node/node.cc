@@ -127,11 +127,12 @@ llvm::Value* IfN::codegen(CodeGenCtx& ctx) {
     auto&& builder = ctx.m_builder;
     auto&& context = ctx.m_context;
 
-    auto* glangStart = module->getFunction("__glang_start");
-    assert(glangStart && "Driver shall create decl for __glang_start");
+    auto&& funcHeader = m_currentScope->getParentFunc();
+    auto* func = module->getFunction(funcHeader->getName());
+    assert(func && "Driver shall create decl for func");
 
-    llvm::BasicBlock *taken = llvm::BasicBlock::Create(*context, "", glangStart);
-    llvm::BasicBlock *notTaken = llvm::BasicBlock::Create(*context, "", glangStart);
+    llvm::BasicBlock *taken = llvm::BasicBlock::Create(*context, "", func);
+    llvm::BasicBlock *notTaken = llvm::BasicBlock::Create(*context, "", func);
 
     auto* conditionCodegen = m_condition->codegen(ctx);
 
@@ -148,12 +149,13 @@ llvm::Value* WhileN::codegen(CodeGenCtx& ctx) {
     auto&& builder = ctx.m_builder;
     auto&& context = ctx.m_context;
 
-    auto* glangStart = module->getFunction("__glang_start");
-    assert(glangStart && "Driver shall create decl for __glang_start");
+    auto&& funcHeader = m_currentScope->getParentFunc();
+    auto* func = module->getFunction(funcHeader->getName());
+    assert(func && "Driver shall create decl for func");
 
-    llvm::BasicBlock *takenBB = llvm::BasicBlock::Create(*context, "", glangStart);
-    llvm::BasicBlock *notTakenBB = llvm::BasicBlock::Create(*context, "", glangStart);
-    llvm::BasicBlock *conditionBB = llvm::BasicBlock::Create(*context, "", glangStart);
+    llvm::BasicBlock *takenBB = llvm::BasicBlock::Create(*context, "", func);
+    llvm::BasicBlock *notTakenBB = llvm::BasicBlock::Create(*context, "", func);
+    llvm::BasicBlock *conditionBB = llvm::BasicBlock::Create(*context, "", func);
 
     builder->CreateBr(conditionBB);
     builder->SetInsertPoint(conditionBB);
