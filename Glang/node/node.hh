@@ -26,6 +26,8 @@ struct CodeGenCtx {
     std::unique_ptr<llvm::LLVMContext> m_context = nullptr;
     std::unique_ptr<llvm::Module> m_module = nullptr;
     std::unique_ptr<llvm::IRBuilder<>> m_builder = nullptr;
+
+    llvm::BasicBlock* m_lastWhileNotTaken = nullptr;
 };
 
 enum class BinOp {
@@ -107,7 +109,9 @@ class FuncDeclN;
 class ScopeN : public INode {
 public:
     ScopeN() = default;
-    ScopeN(std::shared_ptr<ScopeN> parent) : m_parent{parent} {}
+    ScopeN(std::shared_ptr<ScopeN> parent) : m_parent{parent} {
+        m_parentFunc = parent->getParentFunc();
+    }
 
     void insertChild(std::shared_ptr<INode> child) { m_childs.push_back(child); }
     std::shared_ptr<ScopeN> getParent() const { return m_parent; }
@@ -178,6 +182,10 @@ private:
     std::shared_ptr<ScopeN> m_block;
     std::shared_ptr<INode> m_condition;
     std::shared_ptr<ScopeN> m_currentScope;
+};
+
+struct BreakN : public INode {
+    llvm::Value* codegen(CodeGenCtx& ctx) override;
 };
 
 class FuncDeclN : public DeclN {

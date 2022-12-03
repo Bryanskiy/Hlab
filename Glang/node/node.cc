@@ -148,7 +148,9 @@ llvm::Value* IfN::codegen(CodeGenCtx& ctx) {
     builder->CreateCondBr(conditionCodegen, taken, notTaken);
     builder->SetInsertPoint(taken);
     m_block->codegen(ctx);
-    builder->CreateBr(notTaken);
+    if (!taken->getTerminator()) {
+        builder->CreateBr(notTaken);
+    }
     builder->SetInsertPoint(notTaken);
     return nullptr;
 }
@@ -164,6 +166,7 @@ llvm::Value* WhileN::codegen(CodeGenCtx& ctx) {
 
     llvm::BasicBlock *takenBB = llvm::BasicBlock::Create(*context, "", func);
     llvm::BasicBlock *notTakenBB = llvm::BasicBlock::Create(*context, "", func);
+    ctx.m_lastWhileNotTaken = notTakenBB;
     llvm::BasicBlock *conditionBB = llvm::BasicBlock::Create(*context, "", func);
 
     builder->CreateBr(conditionBB);
@@ -176,6 +179,11 @@ llvm::Value* WhileN::codegen(CodeGenCtx& ctx) {
     builder->CreateBr(conditionBB);
 
     builder->SetInsertPoint(notTakenBB);
+    return nullptr;
+}
+
+llvm::Value* BreakN::codegen(CodeGenCtx& ctx) {
+    ctx.m_builder->CreateBr(ctx.m_lastWhileNotTaken);
     return nullptr;
 }
 

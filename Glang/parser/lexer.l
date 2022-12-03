@@ -6,13 +6,14 @@
 
 WS [ \t\n\v]+
 INTEGER [0]|[1-9][0-9]*
-NAME [a-zA-Z][a-zA-Z0-9]*
+NAME [a-zA-Z][a-zA-Z0-9_]*
 
 %%
 "return"    return yy::parser::token_type::RETURN;
 "while"     return yy::parser::token_type::WHILE;
 "if"        return yy::parser::token_type::IF;
 "fn"        return yy::parser::token_type::FN;
+"break"     return yy::parser::token_type::BREAK;
 
 ";"         return yy::parser::token_type::SCOLON;
 "{"         return yy::parser::token_type::LCB;

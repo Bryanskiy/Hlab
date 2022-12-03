@@ -21,6 +21,7 @@
 %token <int> INTEGER
 %token WHILE             "while"   
        RETURN            "return"
+       BREAK             "break"
        INPUT             "?"
        IF                "if"
        FN                "fn"
@@ -156,6 +157,7 @@ stm:            declVar                             { $$ = $1; };
               | output                              { $$ = $1; };
               | return                              { $$ = $1; };
               | funcCall                            { $$ = $1; };
+              | BREAK SCOLON                        { $$ = std::make_shared<glang::BreakN>(); }
 
 declVar:        lval ASSIGN expr1 SCOLON            { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Assign, $3); };
 
