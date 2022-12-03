@@ -62,16 +62,11 @@
 %nterm<std::shared_ptr<glang::INode>>      lval
 %nterm<std::shared_ptr<glang::INode>>      if 
 %nterm<std::shared_ptr<glang::INode>>      while
-%nterm<std::shared_ptr<glang::INode>>      expr1
 %nterm<std::shared_ptr<glang::INode>>      expr2
 %nterm<std::shared_ptr<glang::INode>>      expr3
 %nterm<std::shared_ptr<glang::INode>>      expr4
-%nterm<std::shared_ptr<glang::INode>>      expr5
 %nterm<std::shared_ptr<glang::INode>>      expr6
 %nterm<std::shared_ptr<glang::INode>>      expr7
-%nterm<std::shared_ptr<glang::INode>>      expr8
-%nterm<std::shared_ptr<glang::INode>>      expr9
-%nterm<std::shared_ptr<glang::INode>>      expr10
 %nterm<std::shared_ptr<glang::INode>>      expr11
 %nterm<std::shared_ptr<glang::INode>>      expr12
 %nterm<std::shared_ptr<glang::INode>>      expr0
@@ -165,7 +160,7 @@ stm:            declVar                             { $$ = $1; };
               | while                               { $$ = $1; };
               | output                              { $$ = $1; };
               | return                              { $$ = $1; };
-              | funcCall                            { $$ = $1; };
+              | funcCall SCOLON                     { $$ = $1; };
               | BREAK SCOLON                        { $$ = std::make_shared<glang::BreakN>(); }
 
 declVar:        lval ASSIGN startExpr SCOLON        { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Assign, $3); };

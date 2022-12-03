@@ -267,6 +267,17 @@ llvm::Value* DeclGlobalArrN::codegen(CodeGenCtx& ctx) {
     auto&& context = ctx.m_context;
 
     m_arrayType = llvm::ArrayType::get(builder->getInt32Ty(), m_size);
+    auto&& gArr = new llvm::GlobalVariable(
+    /*Module=*/*module, 
+    /*Type=*/m_arrayType,
+    /*isConstant=*/false,
+    /*Linkage=*/llvm::GlobalValue::ExternalLinkage,
+    /*Initializer=*/0, // has initializer, specified below
+    /*Name=*/m_name);
+
+    llvm::ConstantAggregateZero* constGlobalArray = llvm::ConstantAggregateZero::get(m_arrayType);
+    gArr->setInitializer(constGlobalArray);
+
     m_array = module->getOrInsertGlobal(m_name, m_arrayType);
     return m_array;
 }

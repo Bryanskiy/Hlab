@@ -1,0 +1,44 @@
+current_surf[240000];
+tmp_surf[240000];
+
+fn swap() {
+    x = 0;
+    y = 0;
+
+    while (x < 600) {
+        while(y < 400) {
+
+            id = x + y * 600;
+            tmp = current_surf[id];
+            current_surf[id] = tmp_surf[id];
+            tmp_surf[id] = tmp;
+
+            y = y + 1;            
+        }
+        y = 0;
+        x = x + 1;
+    }
+
+    return 0;
+}
+
+fn main() {
+    current_surf[0] = 12;
+    current_surf[1] = 15;
+    current_surf[2] = 123;
+    tmp_surf[0] = 21;
+    tmp_surf[1] = 51;
+    tmp_surf[2] = 321;    
+
+    swap();
+
+    print current_surf[0];
+    print current_surf[1];
+    print current_surf[2];
+
+    print tmp_surf[0];
+    print tmp_surf[1];
+    print tmp_surf[2];    
+
+    return 0;
+}
