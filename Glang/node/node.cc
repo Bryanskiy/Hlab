@@ -8,12 +8,35 @@ CodeGenCtx::CodeGenCtx() {
     m_builder = std::make_unique<llvm::IRBuilder<>>(*m_context);
 
     // __glang_print
-    llvm::FunctionType* glangPrintTy = llvm::FunctionType::get(m_builder->getVoidTy(), {m_builder->getInt32Ty()}, false);
-    auto* glangPrint = llvm::Function::Create(glangPrintTy, llvm::Function::ExternalLinkage, "__glang_print", *m_module);
+    llvm::FunctionType* functTy = llvm::FunctionType::get(m_builder->getVoidTy(), {m_builder->getInt32Ty()}, false);
+    llvm::Function::Create(functTy, llvm::Function::ExternalLinkage, "__glang_print", *m_module);
 
+    functTy = llvm::FunctionType::get(m_builder->getInt32Ty(), false);
     // __glang_scan
-    llvm::FunctionType* glangScanTy = llvm::FunctionType::get(m_builder->getInt32Ty(), false);
-    auto* glangScan = llvm::Function::Create(glangScanTy, llvm::Function::ExternalLinkage, "__glang_scan", *m_module);
+    llvm::Function::Create(functTy, llvm::Function::ExternalLinkage, "__glang_scan", *m_module);
+
+    // __glang_rand
+    llvm::Function::Create(functTy, llvm::Function::ExternalLinkage, "__glang_rand", *m_module);
+
+    // __glang_flush
+    functTy = llvm::FunctionType::get(m_builder->getVoidTy(), false);
+    llvm::Function::Create(functTy, llvm::Function::ExternalLinkage, "__glang_flush", *m_module);
+
+    // __glang_init_window
+    functTy = llvm::FunctionType::get(m_builder->getVoidTy(), {m_builder->getInt32Ty(), m_builder->getInt32Ty()}, false);
+    llvm::Function::Create(functTy, llvm::Function::ExternalLinkage, "__glang_init_window", *m_module);
+
+    // __glang_put_pixel
+    functTy = llvm::FunctionType::get(
+        m_builder->getVoidTy(), 
+        {
+            m_builder->getInt32Ty(), 
+            m_builder->getInt32Ty(), 
+            m_builder->getInt32Ty()
+        }, 
+        false
+    );
+    llvm::Function::Create(functTy, llvm::Function::ExternalLinkage, "__glang_put_pixel", *m_module);
 }
 
 std::shared_ptr<DeclN> ScopeN::getDeclIfVisible(const std::string& name) const {
