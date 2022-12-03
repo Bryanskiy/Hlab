@@ -1,0 +1,39 @@
+current_surf[240000];
+
+fn neighbors_count(x, y, state) {
+    ret = 0;
+    current_x = x - 1;
+    current_y = y - 1;
+
+    while(current_x <= x + 1) {
+
+        while(current_y <= y + 1) {
+
+            if((current_x == x) && (current_y == y)) {
+                break;
+            }
+
+            if ((current_x < 0) || (current_x >= 600)) {
+                break;
+            }
+
+            if ((current_y < 0) || current_y >= 400) {
+                break;
+            }
+
+            if (current_surf[current_x + 600 * current_y] == state) {
+                ret = ret + 1;
+            }
+
+            current_y = current_y + 1;
+        }
+        current_y = y - 1;
+        current_x = current_x + 1;
+    }
+
+    return ret;
+}
+
+fn main() {
+    return 0;
+}
