@@ -65,7 +65,17 @@
 %nterm<std::shared_ptr<glang::INode>>      expr1
 %nterm<std::shared_ptr<glang::INode>>      expr2
 %nterm<std::shared_ptr<glang::INode>>      expr3
-%nterm<std::shared_ptr<glang::INode>>      condition
+%nterm<std::shared_ptr<glang::INode>>      expr4
+%nterm<std::shared_ptr<glang::INode>>      expr5
+%nterm<std::shared_ptr<glang::INode>>      expr6
+%nterm<std::shared_ptr<glang::INode>>      expr7
+%nterm<std::shared_ptr<glang::INode>>      expr8
+%nterm<std::shared_ptr<glang::INode>>      expr9
+%nterm<std::shared_ptr<glang::INode>>      expr10
+%nterm<std::shared_ptr<glang::INode>>      expr11
+%nterm<std::shared_ptr<glang::INode>>      expr12
+%nterm<std::shared_ptr<glang::INode>>      expr0
+%nterm<std::shared_ptr<glang::INode>>      startExpr
 %nterm<std::shared_ptr<glang::INode>>      output 
 %nterm<std::shared_ptr<glang::INode>>      stms
 %nterm<std::shared_ptr<glang::INode>>      return
@@ -140,7 +150,6 @@ closeSc:        RCB                                 {
                                                         scope = scope->getParent();
                                                     };
 
-
 stms:           stm                                 {
                                                         auto&& scope = driver->m_currentScope;
                                                         scope->insertChild($1);
@@ -159,7 +168,7 @@ stm:            declVar                             { $$ = $1; };
               | funcCall                            { $$ = $1; };
               | BREAK SCOLON                        { $$ = std::make_shared<glang::BreakN>(); }
 
-declVar:        lval ASSIGN expr1 SCOLON            { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Assign, $3); };
+declVar:        lval ASSIGN startExpr SCOLON        { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Assign, $3); };
 
 lval:           IDENTIFIER                          {
                                                         auto&& scope = driver->m_currentScope;
@@ -172,23 +181,44 @@ lval:           IDENTIFIER                          {
                                                     };
               | arrAccess                           { $$ = $1; };
 
-arrAccess:      IDENTIFIER LAB expr1 RAB            {
+arrAccess:      IDENTIFIER LAB startExpr RAB        {
                                                         auto&& scope = driver->m_currentScope;
                                                         auto&& node = scope->getDeclIfVisible($1);
                                                         assert(node != nullptr && "undeclared");
                                                         $$ = std::make_shared<glang::ArrAccessN>($3, node);
                                                     };
 
-expr1:          expr2 PLUS expr2                    { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Plus, $3); };
-              | expr2 MINUS expr2                   { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Minus, $3); };
-              | expr2                               { $$ = $1; };
+startExpr:      expr12                              { $$ = $1; };
 
-expr2:          expr3 MUL expr3                     { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Mult, $3); };
-              | expr3 DIV expr3                     { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Div, $3); };
-              | expr3 MOD expr3                     { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Mod, $3); };
+expr12:         expr11 OR expr11                    { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Or, $3); };  
+              | expr11                              { $$ = $1; };
+
+expr11:         expr7 AND expr7                     { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::And, $3); };
+              | expr7                               { $$ = $1; };
+
+expr7:          expr6 EQUAL expr6                   { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Equal, $3); };  
+              | expr6 NOT_EQUAL expr6               { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::NotEqual, $3); };  
+              | expr6                               { $$ = $1; };
+
+expr6:          expr4 GREATER expr4                 { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Greater, $3); };  
+              | expr4 LESS expr4                    { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Less, $3); };  
+              | expr4 GREATER_OR_EQUAL expr4        { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::GreaterOrEqual, $3); };  
+              | expr4 LESS_OR_EQUAL expr4           { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::LessOrEqual, $3); };
+              | expr4                               { $$ = $1; };
+
+expr4:          expr3 PLUS expr3                    { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Plus, $3); };
+              | expr3 MINUS expr3                   { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Minus, $3); };
               | expr3                               { $$ = $1; };
 
-expr3:          LRB expr1 RRB                       { $$ = $2; }; 
+expr3:          expr2 MUL expr2                     { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Mult, $3); };
+              | expr2 DIV expr2                     { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Div, $3); };
+              | expr2 MOD expr2                     { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Mod, $3); };
+              | expr2                               { $$ = $1; };
+
+expr2:          NOT expr0                           { $$ = std::make_shared<glang::UnOpN>(glang::UnOp::Not, $2); };
+              | expr0                               { $$ = $1; };
+
+expr0:          LRB expr12 RRB                      { $$ = $2; }; 
               | IDENTIFIER                          
                                                     {
                                                         auto&& scope = driver->m_currentScope;
@@ -212,30 +242,19 @@ funcCall:       IDENTIFIER LRB argList RRB          {
                                                         currentFunctionArgs.clear();
                                                     };
 
-condition:    expr1 AND expr1                       { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::And, $3); };
-            | expr1 OR expr1                        { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Or, $3); };      
-            | NOT expr1                             { $$ = std::make_shared<glang::UnOpN>(glang::UnOp::Not, $2); };    
-            | expr1 EQUAL expr1                     { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Equal, $3); };  
-            | expr1 NOT_EQUAL expr1                 { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::NotEqual, $3); };  
-            | expr1 GREATER expr1                   { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Greater, $3); };  
-            | expr1 LESS expr1                      { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::Less, $3); };  
-            | expr1 GREATER_OR_EQUAL expr1          { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::GreaterOrEqual, $3); };  
-            | expr1 LESS_OR_EQUAL expr1             { $$ = std::make_shared<glang::BinOpN>($1, glang::BinOp::LessOrEqual, $3); };
-            | expr1                                 { $$ = $1; };
-
-if:          IF LRB condition RRB scope             {
+if:          IF LRB startExpr RRB scope             {
                                                         auto&& scope = driver->m_currentScope;
                                                         $$ = std::make_shared<glang::IfN>($5, $3, scope);
                                                     };
 
-while:       WHILE LRB condition RRB scope          {
+while:       WHILE LRB startExpr RRB scope          {
                                                         auto&& scope = driver->m_currentScope;
                                                         $$ = std::make_shared<glang::WhileN>($5, $3, scope);
                                                     };
 
-output:      OUTPUT expr1 SCOLON                    { $$ = std::make_shared<glang::UnOpN>(glang::UnOp::Output, $2); };
+output:      OUTPUT startExpr SCOLON                { $$ = std::make_shared<glang::UnOpN>(glang::UnOp::Output, $2); };
 
-return:      RETURN expr1 SCOLON                    { $$ = std::make_shared<glang::RetN>($2); };
+return:      RETURN startExpr SCOLON                { $$ = std::make_shared<glang::RetN>($2); };
 
 %%
 
