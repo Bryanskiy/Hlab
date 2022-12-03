@@ -3,8 +3,8 @@ source_filename = "main.c"
 target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-pc-linux-gnu"
 
-@current_surf = dso_local global [600 x [400 x i32]] zeroinitializer, align 16
-@tmp_surf = dso_local global [600 x [400 x i32]] zeroinitializer, align 16
+@current_surf = dso_local global [240000 x i32] zeroinitializer, align 16
+@tmp_surf = dso_local global [240000 x i32] zeroinitializer, align 16
 
 ; Function Attrs: noinline nounwind optnone uwtable
 define dso_local void @init_world() #0 {
@@ -31,11 +31,11 @@ define dso_local void @init_world() #0 {
   %11 = call i32 (...) @dr_rand()
   %12 = srem i32 %11, 16
   %13 = load i32, i32* %1, align 4
-  %14 = sext i32 %13 to i64
-  %15 = getelementptr inbounds [600 x [400 x i32]], [600 x [400 x i32]]* @current_surf, i64 0, i64 %14
-  %16 = load i32, i32* %2, align 4
+  %14 = load i32, i32* %2, align 4
+  %15 = mul nsw i32 %14, 600
+  %16 = add nsw i32 %13, %15
   %17 = sext i32 %16 to i64
-  %18 = getelementptr inbounds [400 x i32], [400 x i32]* %15, i64 0, i64 %17
+  %18 = getelementptr inbounds [240000 x i32], [240000 x i32]* @current_surf, i64 0, i64 %17
   store i32 %12, i32* %18, align 4
   br label %19
 
@@ -87,11 +87,11 @@ define dso_local void @update() #0 {
 
 14:                                               ; preds = %11
   %15 = load i32, i32* %1, align 4
-  %16 = sext i32 %15 to i64
-  %17 = getelementptr inbounds [600 x [400 x i32]], [600 x [400 x i32]]* @current_surf, i64 0, i64 %16
-  %18 = load i32, i32* %2, align 4
+  %16 = load i32, i32* %2, align 4
+  %17 = mul nsw i32 %16, 600
+  %18 = add nsw i32 %15, %17
   %19 = sext i32 %18 to i64
-  %20 = getelementptr inbounds [400 x i32], [400 x i32]* %17, i64 0, i64 %19
+  %20 = getelementptr inbounds [240000 x i32], [240000 x i32]* @current_surf, i64 0, i64 %19
   %21 = load i32, i32* %20, align 4
   store i32 %21, i32* %3, align 4
   %22 = load i32, i32* %3, align 4
@@ -131,11 +131,11 @@ define dso_local void @update() #0 {
 40:                                               ; preds = %38, %36
   %41 = load i32, i32* %6, align 4
   %42 = load i32, i32* %1, align 4
-  %43 = sext i32 %42 to i64
-  %44 = getelementptr inbounds [600 x [400 x i32]], [600 x [400 x i32]]* @tmp_surf, i64 0, i64 %43
-  %45 = load i32, i32* %2, align 4
+  %43 = load i32, i32* %2, align 4
+  %44 = mul nsw i32 %43, 600
+  %45 = add nsw i32 %42, %44
   %46 = sext i32 %45 to i64
-  %47 = getelementptr inbounds [400 x i32], [400 x i32]* %44, i64 0, i64 %46
+  %47 = getelementptr inbounds [240000 x i32], [240000 x i32]* @tmp_surf, i64 0, i64 %46
   store i32 %41, i32* %47, align 4
   br label %48
 
@@ -235,11 +235,11 @@ define internal i32 @neighbors_count(i32 noundef %0, i32 noundef %1, i32 noundef
 
 47:                                               ; preds = %43
   %48 = load i32, i32* %8, align 4
-  %49 = sext i32 %48 to i64
-  %50 = getelementptr inbounds [600 x [400 x i32]], [600 x [400 x i32]]* @current_surf, i64 0, i64 %49
-  %51 = load i32, i32* %9, align 4
+  %49 = load i32, i32* %9, align 4
+  %50 = mul nsw i32 %49, 600
+  %51 = add nsw i32 %48, %50
   %52 = sext i32 %51 to i64
-  %53 = getelementptr inbounds [400 x i32], [400 x i32]* %50, i64 0, i64 %52
+  %53 = getelementptr inbounds [240000 x i32], [240000 x i32]* @current_surf, i64 0, i64 %52
   %54 = load i32, i32* %53, align 4
   %55 = load i32, i32* %6, align 4
   %56 = icmp eq i32 %54, %55
@@ -298,34 +298,34 @@ define dso_local void @swap() #0 {
 
 11:                                               ; preds = %8
   %12 = load i32, i32* %1, align 4
-  %13 = sext i32 %12 to i64
-  %14 = getelementptr inbounds [600 x [400 x i32]], [600 x [400 x i32]]* @current_surf, i64 0, i64 %13
-  %15 = load i32, i32* %2, align 4
+  %13 = load i32, i32* %2, align 4
+  %14 = mul nsw i32 %13, 600
+  %15 = add nsw i32 %12, %14
   %16 = sext i32 %15 to i64
-  %17 = getelementptr inbounds [400 x i32], [400 x i32]* %14, i64 0, i64 %16
+  %17 = getelementptr inbounds [240000 x i32], [240000 x i32]* @current_surf, i64 0, i64 %16
   %18 = load i32, i32* %17, align 4
   store i32 %18, i32* %3, align 4
   %19 = load i32, i32* %1, align 4
-  %20 = sext i32 %19 to i64
-  %21 = getelementptr inbounds [600 x [400 x i32]], [600 x [400 x i32]]* @tmp_surf, i64 0, i64 %20
-  %22 = load i32, i32* %2, align 4
+  %20 = load i32, i32* %2, align 4
+  %21 = mul nsw i32 %20, 600
+  %22 = add nsw i32 %19, %21
   %23 = sext i32 %22 to i64
-  %24 = getelementptr inbounds [400 x i32], [400 x i32]* %21, i64 0, i64 %23
+  %24 = getelementptr inbounds [240000 x i32], [240000 x i32]* @tmp_surf, i64 0, i64 %23
   %25 = load i32, i32* %24, align 4
   %26 = load i32, i32* %1, align 4
-  %27 = sext i32 %26 to i64
-  %28 = getelementptr inbounds [600 x [400 x i32]], [600 x [400 x i32]]* @current_surf, i64 0, i64 %27
-  %29 = load i32, i32* %2, align 4
+  %27 = load i32, i32* %2, align 4
+  %28 = mul nsw i32 %27, 600
+  %29 = add nsw i32 %26, %28
   %30 = sext i32 %29 to i64
-  %31 = getelementptr inbounds [400 x i32], [400 x i32]* %28, i64 0, i64 %30
+  %31 = getelementptr inbounds [240000 x i32], [240000 x i32]* @current_surf, i64 0, i64 %30
   store i32 %25, i32* %31, align 4
   %32 = load i32, i32* %3, align 4
   %33 = load i32, i32* %1, align 4
-  %34 = sext i32 %33 to i64
-  %35 = getelementptr inbounds [600 x [400 x i32]], [600 x [400 x i32]]* @tmp_surf, i64 0, i64 %34
-  %36 = load i32, i32* %2, align 4
+  %34 = load i32, i32* %2, align 4
+  %35 = mul nsw i32 %34, 600
+  %36 = add nsw i32 %33, %35
   %37 = sext i32 %36 to i64
-  %38 = getelementptr inbounds [400 x i32], [400 x i32]* %35, i64 0, i64 %37
+  %38 = getelementptr inbounds [240000 x i32], [240000 x i32]* @tmp_surf, i64 0, i64 %37
   store i32 %32, i32* %38, align 4
   br label %39
 
@@ -373,11 +373,11 @@ define dso_local void @draw() #0 {
   %11 = load i32, i32* %1, align 4
   %12 = load i32, i32* %2, align 4
   %13 = load i32, i32* %1, align 4
-  %14 = sext i32 %13 to i64
-  %15 = getelementptr inbounds [600 x [400 x i32]], [600 x [400 x i32]]* @current_surf, i64 0, i64 %14
-  %16 = load i32, i32* %2, align 4
+  %14 = load i32, i32* %2, align 4
+  %15 = mul nsw i32 %14, 600
+  %16 = add nsw i32 %13, %15
   %17 = sext i32 %16 to i64
-  %18 = getelementptr inbounds [400 x i32], [400 x i32]* %15, i64 0, i64 %17
+  %18 = getelementptr inbounds [240000 x i32], [240000 x i32]* @current_surf, i64 0, i64 %17
   %19 = load i32, i32* %18, align 4
   call void @dr_put_pixel(i32 noundef %11, i32 noundef %12, i32 noundef %19)
   br label %20
