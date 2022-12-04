@@ -8,12 +8,14 @@ fn neighbors_count(x, y, state) {
 fn update() {
     x = 0;
     y = 0;
+    successor = 0;
+    neighbors = 0;
+    new_st = 0;
 
     while (x < 600) {
         while(y < 400) {
 
             current_state = current_surf[x + y * 600];
-            successor = 0;
             if (current_state == 0) {
                 successor = 15;
             } 
