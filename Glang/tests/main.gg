@@ -1,0 +1,31 @@
+fn init_world() {
+    return 0;
+}
+
+fn draw() {
+    return 0;
+}
+
+fn update() {
+    return 0;
+}
+
+fn swap() {
+    return 0;
+}
+
+fn main() {
+    width = 600;
+    height = 400;
+    __glang_init_window(width, height);
+
+    init_world();
+    true = 1;
+    while(true == 1) {
+        draw();
+        update();
+        swap();
+    }
+
+    return 0;
+}
