@@ -23,6 +23,13 @@ fn update() {
             }
 
             neighbors = neighbors_count(x, y, successor);
+            new_st = current_state;
+
+            if(neighbors >= 1) {
+                new_st = successor;
+            }
+            
+            tmp_surf[x + y * 600] = new_st;
 
             y = y + 1;            
         }
