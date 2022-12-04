@@ -6,7 +6,7 @@
 
 WS [ \t\n\v]+
 INTEGER [0]|[1-9][0-9]*
-NAME [a-zA-Z][a-zA-Z0-9_]*
+NAME [_]*[a-zA-Z][a-zA-Z0-9_]*
 
 %%
 "return"    return yy::parser::token_type::RETURN;

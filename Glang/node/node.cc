@@ -89,8 +89,7 @@ llvm::Value* BinOpN::codegen(CodeGenCtx& ctx) {
     case BinOp::Div:
         return ctx.m_builder->CreateSDiv(lhsCodeGen, rhsCodeGen);
     case BinOp::Mod:
-        // todo
-        assert(0);
+        return ctx.m_builder->CreateSRem(lhsCodeGen, rhsCodeGen);
     case BinOp::Mult:
         return ctx.m_builder->CreateMul(lhsCodeGen, rhsCodeGen);
     case BinOp::And:
