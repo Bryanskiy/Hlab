@@ -1,0 +1,24 @@
+current_surf[240000];
+
+fn init_world() {
+    x = 0;
+    y = 0;
+
+    while (x < 600) {
+        while(y < 400) {
+
+            id = x + y * 600;
+            current_surf[id] = __glang_rand() % 16;
+
+            y = y + 1;            
+        }
+        y = 0;
+        x = x + 1;
+    }
+
+    return 0;
+}
+
+fn main() {
+    return 0;
+}

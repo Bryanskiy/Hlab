@@ -21,6 +21,8 @@
 
 namespace glang {
 
+class ScopeN;
+
 struct CodeGenCtx {
     CodeGenCtx();
     std::unique_ptr<llvm::LLVMContext> m_context = nullptr;
@@ -28,6 +30,7 @@ struct CodeGenCtx {
     std::unique_ptr<llvm::IRBuilder<>> m_builder = nullptr;
 
     llvm::BasicBlock* m_lastWhileNotTaken = nullptr;
+    void initGraphics(std::shared_ptr<ScopeN> globalScope);
 };
 
 enum class BinOp {
@@ -194,6 +197,7 @@ public:
     llvm::Value* codegen(CodeGenCtx& ctx) override;
     const std::vector<std::string>& getArgNames() const { return m_argNames; }
     const std::string& getName() const { return m_name; }
+    void setFunc(llvm::Function* func) { m_func = func; }
 private:
     std::vector<std::string> m_argNames;
     std::string m_name;

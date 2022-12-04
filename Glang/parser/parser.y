@@ -226,13 +226,11 @@ expr0:          LRB expr12 RRB                      { $$ = $2; };
               | funcCall                            { $$ = $1; };
               | arrAccess                           { $$ = $1; }
 
-funcCall:       IDENTIFIER LRB argList RRB          { 
+funcCall:       IDENTIFIER LRB argList RRB          {
                                                         auto&& scope = driver->m_currentScope;
                                                         auto&& currentFunctionArgs = driver->m_currentFunctionArgs;
                                                         auto&& node = scope->getDeclIfVisible($1);
-                                                        if (!node) {
-                                                            node = std::make_shared<glang::FuncDeclN>($1, currentFunctionArgs);
-                                                        }
+                                                        assert(node != nullptr);
                                                         $$ = std::make_shared<glang::FuncCallN>(node, scope, currentFunctionArgs);
                                                         currentFunctionArgs.clear();
                                                     };

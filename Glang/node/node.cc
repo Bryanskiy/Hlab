@@ -14,9 +14,17 @@ CodeGenCtx::CodeGenCtx() {
     functTy = llvm::FunctionType::get(m_builder->getInt32Ty(), false);
     // __glang_scan
     llvm::Function::Create(functTy, llvm::Function::ExternalLinkage, "__glang_scan", *m_module);
+}
+
+void CodeGenCtx::initGraphics(std::shared_ptr<ScopeN> globalScope) {
+    llvm::FunctionType* functTy = llvm::FunctionType::get(m_builder->getInt32Ty(), false);
 
     // __glang_rand
-    llvm::Function::Create(functTy, llvm::Function::ExternalLinkage, "__glang_rand", *m_module);
+    std::string name = "__glang_rand";
+    auto&& decl = std::make_shared<glang::FuncDeclN>(name);
+    llvm::Function* func = llvm::Function::Create(functTy, llvm::Function::ExternalLinkage, name, *m_module);
+    decl->setFunc(func);
+    globalScope->insertDecl(name, decl);
 
     // __glang_flush
     functTy = llvm::FunctionType::get(m_builder->getVoidTy(), false);
