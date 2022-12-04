@@ -27,14 +27,24 @@ void CodeGenCtx::initGraphics(std::shared_ptr<ScopeN> globalScope) {
     globalScope->insertDecl(name, decl);
 
     // __glang_flush
+    name = "__glang_flush";
+    decl = std::make_shared<glang::FuncDeclN>(name);
     functTy = llvm::FunctionType::get(m_builder->getVoidTy(), false);
-    llvm::Function::Create(functTy, llvm::Function::ExternalLinkage, "__glang_flush", *m_module);
+    func = llvm::Function::Create(functTy, llvm::Function::ExternalLinkage, name, *m_module);
+    decl->setFunc(func);
+    globalScope->insertDecl(name, decl);
 
     // __glang_init_window
+    name = "__glang_init_window";
+    decl = std::make_shared<glang::FuncDeclN>(name);
     functTy = llvm::FunctionType::get(m_builder->getVoidTy(), {m_builder->getInt32Ty(), m_builder->getInt32Ty()}, false);
-    llvm::Function::Create(functTy, llvm::Function::ExternalLinkage, "__glang_init_window", *m_module);
+    func = llvm::Function::Create(functTy, llvm::Function::ExternalLinkage, name, *m_module);
+    decl->setFunc(func);
+    globalScope->insertDecl(name, decl);
 
     // __glang_put_pixel
+    name = "__glang_put_pixel";
+    decl = std::make_shared<glang::FuncDeclN>(name);
     functTy = llvm::FunctionType::get(
         m_builder->getVoidTy(), 
         {
@@ -44,7 +54,9 @@ void CodeGenCtx::initGraphics(std::shared_ptr<ScopeN> globalScope) {
         }, 
         false
     );
-    llvm::Function::Create(functTy, llvm::Function::ExternalLinkage, "__glang_put_pixel", *m_module);
+    func = llvm::Function::Create(functTy, llvm::Function::ExternalLinkage, name, *m_module);
+    decl->setFunc(func);
+    globalScope->insertDecl(name, decl);
 }
 
 std::shared_ptr<DeclN> ScopeN::getDeclIfVisible(const std::string& name) const {
@@ -278,13 +290,11 @@ llvm::Value* FuncCallN::codegen(CodeGenCtx& ctx) {
     auto* funcDecl = llvm::dyn_cast<llvm::Function>(m_funcDecl->codegen(ctx));
     auto* funcTy = funcDecl->getFunctionType();
 
-    auto&& symTable = m_currScope->getSymTab();
-
     std::vector<llvm::Value*> args;
     for (auto&& name : m_argNames) {
-        auto&& it = symTable.find(name);
-        assert(it != symTable.end());
-        args.push_back(it->second->codegen(ctx));
+        auto&& it = m_currScope->getDeclIfVisible(name);
+        assert(it != nullptr);
+        args.push_back(it->codegen(ctx));
     }
 
     auto* ret = builder->CreateCall(funcTy, funcDecl, args);

@@ -1,0 +1,25 @@
+current_surf[240000];
+
+fn draw() {
+    x = 0;
+    y = 0;
+
+    while (x < 600) {
+        while(y < 400) {
+
+            surf_val = current_surf[x + 600 * y];
+            __glang_put_pixel(x, y, surf_val);
+
+            y = y + 1;            
+        }
+        y = 0;
+        x = x + 1;
+    }
+
+    __glang_flush();
+    return 0;
+}
+
+fn main() {
+    return 0;
+}

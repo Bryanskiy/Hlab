@@ -6,7 +6,7 @@ fn main() {
 
         while(current_y <= 12) {
             print current_y;
-            current_y = current_y + 1;  
+            current_y = current_y + 1;
         }
 
         current_x = current_x + 1;
